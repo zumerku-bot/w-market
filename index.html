@@ -813,7 +813,9 @@ function saveReviews(){localStorage.setItem('wm_reviews',JSON.stringify(reviews)
 function starStr(n){return '★★★★★☆☆☆☆☆'.slice(5-n,10-n);}
 function renderReviews(){
   const list=document.getElementById('revList');
-  list.innerHTML=reviews.map(r=>`
+  // показываем только корректные отзывы (оценка 1–5) — фейки с кривой оценкой игнорируем
+  const rs=(reviews||[]).filter(r=>r && Number(r.rating)>=1 && Number(r.rating)<=5);
+  list.innerHTML=rs.map(r=>`
     <div class="review">
       <div class="review-top">
         <div class="review-who">
@@ -830,15 +832,15 @@ function renderReviews(){
     </div>`).join('');
 
   // summary
-  const n=reviews.length;
-  const avg=n?reviews.reduce((a,r)=>a+r.rating,0)/n:5;
+  const n=rs.length;
+  const avg=n?rs.reduce((a,r)=>a+Number(r.rating),0)/n:5;
   document.getElementById('avgScore').textContent=avg.toFixed(1);
   document.getElementById('avgStars').textContent=starStr(Math.round(avg));
   document.getElementById('revCount').textContent=n+' '+plural(n,'отзыв','отзыва','отзывов');
   // bars
   let bars='';
   for(let s=5;s>=1;s--){
-    const c=reviews.filter(r=>r.rating===s).length;
+    const c=rs.filter(r=>Number(r.rating)===s).length;
     const pct=n?Math.round(c/n*100):0;
     bars+=`<div class="rev-bar"><span>${s}★</span><div class="track"><div class="fill" style="width:${pct}%"></div></div><span>${c}</span></div>`;
   }
