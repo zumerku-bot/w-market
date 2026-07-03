@@ -688,8 +688,8 @@ function productCard(p, buyable){
   const inCart = cart[p.id];
   return `<div class="card">
     <div class="card-img">
-      ${p.badge?`<span class="badge ${p.badge==='NEW'?'dark':''}">${p.badge}</span>`:''}
-      ${p.photo?`<img src="${p.photo}" alt="${escapeHtml(p.name)}">`:`<span class="emoji">${p.emoji}</span>`}
+      ${p.badge?`<span class="badge ${p.badge==='NEW'?'dark':''}">${escapeHtml(p.badge)}</span>`:''}
+      ${safePhoto(p.photo)?`<img src="${safePhoto(p.photo)}" alt="${escapeHtml(p.name)}">`:`<span class="emoji">${escapeHtml(p.emoji)}</span>`}
     </div>
     <div class="card-body">
       <div class="card-cat">${escapeHtml(p.cat)}</div>
@@ -826,7 +826,7 @@ function renderReviews(){
         </div>
       </div>
       <p>${escapeHtml(r.text)}</p>
-      ${(r.photos&&r.photos.length)?`<div class="review-photos">${r.photos.map(src=>`<img src="${src}" onclick="openLightbox('${src}')" alt="фото заказа">`).join('')}</div>`:''}
+      ${(r.photos&&r.photos.length)?`<div class="review-photos">${r.photos.map(safePhoto).filter(Boolean).map(src=>`<img src="${src}" onclick="openLightbox(this.src)" alt="фото заказа">`).join('')}</div>`:''}
     </div>`).join('');
 
   // summary
@@ -902,7 +902,15 @@ function toast(msg){
   const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);
 }
-function escapeHtml(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function escapeHtml(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// Пропускаем только безопасные адреса картинок (относительный img/, data:image, http/https). Иначе — пусто.
+function safePhoto(u){
+  u = String(u||'');
+  if(/^img\/[\w./ -]+$/.test(u)) return u;
+  if(/^https?:\/\/[^\s"'<>]+$/.test(u)) return u;
+  if(/^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(u)) return u;
+  return '';
+}
 function plural(n,one,few,many){const n10=n%10,n100=n%100;if(n10===1&&n100!==11)return one;if(n10>=2&&n10<=4&&(n100<10||n100>=20))return few;return many;}
 function fmtDate(d){try{return new Date(d).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});}catch(e){return d;}}
 
@@ -946,7 +954,7 @@ function openProductModal(section,id){
   document.getElementById('pmBadge').value=p&&p.badge?p.badge:'';
   document.getElementById('pmPhoto').value='';
   const prev=document.getElementById('pmPreview');
-  if(p&&p.photo){prev.innerHTML=`<img src="${p.photo}">`;}
+  if(p&&safePhoto(p.photo)){prev.innerHTML=`<img src="${safePhoto(p.photo)}">`;}
   else{prev.textContent=p&&p.emoji?p.emoji:'👕';}
   document.getElementById('pmOverlay').classList.add('open');
   document.getElementById('pModal').classList.add('open');
