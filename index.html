@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W MARKET — магазин одежды и доставка из Китая</title>
+<style>
+  :root{
+    --bg:#000;
+    --bg2:#0a0a0a;
+    --card:#0f0f0f;
+    --line:#222;
+    --line2:#333;
+    --fg:#fff;
+    --muted:#8a8a8a;
+    --muted2:#5c5c5c;
+    --accent:#fff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--fg);
+    font-family:'Segoe UI',-apple-system,Roboto,Arial,sans-serif;
+    line-height:1.5;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  img{max-width:100%;display:block}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+  /* ===== HEADER ===== */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(0,0,0,.85);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar{
+    max-width:1200px;margin:0 auto;padding:14px 20px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .logo{display:flex;align-items:center;gap:12px;cursor:pointer}
+  .logo-mark{
+    width:46px;height:46px;border-radius:10px;
+    background:#000;border:1px solid var(--line2);
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;flex-shrink:0;
+  }
+  .logo-mark svg{width:100%;height:100%}
+  .logo-text{line-height:1}
+  .logo-text b{font-size:20px;font-weight:800;letter-spacing:3px}
+  .logo-text span{display:block;font-size:9px;letter-spacing:4px;color:var(--muted);margin-top:3px}
+
+  .cart-btn{
+    position:relative;display:flex;align-items:center;gap:8px;
+    border:1px solid var(--line2);border-radius:10px;padding:9px 14px;
+    font-size:13px;font-weight:600;transition:.15s;
+  }
+  .cart-btn:hover{background:#fff;color:#000;border-color:#fff}
+  .cart-count{
+    position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;
+    background:#fff;color:#000;border-radius:10px;font-size:11px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;padding:0 5px;
+  }
+
+  /* ===== NAV TABS ===== */
+  nav{
+    max-width:1200px;margin:0 auto;padding:0 20px;
+    display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;
+  }
+  nav::-webkit-scrollbar{display:none}
+  .tab{
+    padding:13px 18px;font-size:14px;font-weight:600;color:var(--muted);
+    border-bottom:2px solid transparent;white-space:nowrap;transition:.15s;
+  }
+  .tab:hover{color:#fff}
+  .tab.active{color:#fff;border-bottom-color:#fff}
+
+  /* ===== LAYOUT ===== */
+  main{max-width:1200px;margin:0 auto;padding:0 20px 80px}
+  .section{display:none;animation:fade .35s ease}
+  .section.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* ===== HERO ===== */
+  .hero{
+    border:1px solid var(--line);border-radius:18px;overflow:hidden;
+    margin:28px 0;padding:54px 40px;
+    background:
+      radial-gradient(900px 400px at 80% -20%,rgba(255,255,255,.10),transparent 60%),
+      linear-gradient(180deg,#101010,#000);
+    position:relative;
+  }
+  .hero h1{font-size:clamp(28px,5vw,46px);font-weight:800;letter-spacing:-.5px;line-height:1.05}
+  .hero p{color:var(--muted);max-width:560px;margin-top:14px;font-size:16px}
+  .hero-actions{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;justify-content:center;
+    padding:13px 22px;border-radius:11px;font-size:14px;font-weight:700;transition:.15s;
+  }
+  .btn-primary{background:#fff;color:#000}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(255,255,255,.15)}
+  .btn-ghost{border:1px solid var(--line2)}
+  .btn-ghost:hover{background:#fff;color:#000;border-color:#fff}
+
+  /* ===== SECTION TITLES ===== */
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:36px 0 20px;flex-wrap:wrap}
+  .sec-head h2{font-size:26px;font-weight:800;letter-spacing:-.3px}
+  .sec-head p{color:var(--muted);font-size:14px;margin-top:4px}
+
+  /* ===== FILTERS ===== */
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+  .chip{
+    padding:8px 16px;border:1px solid var(--line2);border-radius:30px;
+    font-size:13px;font-weight:600;color:var(--muted);transition:.15s;
+  }
+  .chip:hover{color:#fff;border-color:#666}
+  .chip.active{background:#fff;color:#000;border-color:#fff}
+  .search{
+    flex:1;min-width:200px;display:flex;align-items:center;gap:10px;
+    border:1px solid var(--line2);border-radius:30px;padding:8px 16px;
+  }
+  .search input{flex:1;background:none;border:none;color:#fff;font-size:14px;outline:none}
+  .search input::placeholder{color:var(--muted2)}
+
+  /* ===== PRODUCT GRID ===== */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    overflow:hidden;transition:.2s;display:flex;flex-direction:column;
+  }
+  .card:hover{border-color:#444;transform:translateY(-4px)}
+  .card-img{
+    aspect-ratio:1/1;background:linear-gradient(135deg,#1a1a1a,#000);
+    display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+  }
+  .card-img .emoji{font-size:64px;filter:grayscale(1) contrast(1.1)}
+  .badge{
+    position:absolute;top:12px;left:12px;background:#fff;color:#000;
+    font-size:10px;font-weight:800;letter-spacing:.5px;padding:4px 9px;border-radius:6px;
+  }
+  .badge.dark{background:#000;color:#fff;border:1px solid var(--line2)}
+  .card-body{padding:14px 15px 16px;display:flex;flex-direction:column;flex:1}
+  .card-cat{font-size:11px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+  .card-name{font-size:15px;font-weight:700;margin:5px 0 2px}
+  .card-sizes{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;gap:10px}
+  .price{font-size:18px;font-weight:800}
+  .price small{font-size:12px;color:var(--muted);font-weight:500}
+  .add-btn{
+    background:#fff;color:#000;border-radius:10px;padding:9px 14px;
+    font-size:13px;font-weight:700;transition:.15s;white-space:nowrap;
+  }
+  .add-btn:hover{opacity:.8}
+  .add-btn.added{background:#000;color:#fff;border:1px solid var(--line2)}
+
+  /* ===== STEPS (china) ===== */
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:34px}
+  .step{border:1px solid var(--line);border-radius:14px;padding:22px 20px;background:var(--card)}
+  .step-num{
+    width:34px;height:34px;border-radius:9px;background:#fff;color:#000;
+    font-weight:800;display:flex;align-items:center;justify-content:center;margin-bottom:14px;
+  }
+  .step h4{font-size:15px;font-weight:700;margin-bottom:6px}
+  .step p{font-size:13px;color:var(--muted)}
+
+  /* ===== CALCULATOR ===== */
+  .calc{
+    border:1px solid var(--line);border-radius:16px;padding:26px;background:var(--card);
+    margin-bottom:34px;display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:end;
+  }
+  .calc-full{grid-column:1/-1}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px;letter-spacing:.3px}
+  .field input,.field select,.field textarea{
+    width:100%;background:#000;border:1px solid var(--line2);border-radius:10px;
+    padding:12px 14px;color:#fff;font-size:14px;outline:none;transition:.15s;font-family:inherit;
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:#fff}
+  .field textarea{resize:vertical;min-height:80px}
+  .calc-result{
+    grid-column:1/-1;border-top:1px solid var(--line);padding-top:20px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  }
+  .calc-result .total{font-size:13px;color:var(--muted)}
+  .calc-result .total b{display:block;font-size:30px;color:#fff;font-weight:800;margin-top:2px}
+
+  /* ===== REVIEWS ===== */
+  .rev-summary{
+    display:flex;align-items:center;gap:30px;border:1px solid var(--line);
+    border-radius:16px;padding:26px;background:var(--card);margin-bottom:26px;flex-wrap:wrap;
+  }
+  .rev-score{text-align:center}
+  .rev-score .big{font-size:54px;font-weight:800;line-height:1}
+  .rev-score .stars{font-size:18px;letter-spacing:2px;margin-top:4px}
+  .rev-score small{color:var(--muted);font-size:13px}
+  .rev-bars{flex:1;min-width:220px}
+  .rev-bar{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);margin:4px 0}
+  .rev-bar .track{flex:1;height:7px;background:#1c1c1c;border-radius:4px;overflow:hidden}
+  .rev-bar .fill{height:100%;background:#fff}
+
+  .rev-form{border:1px solid var(--line);border-radius:16px;padding:24px;background:var(--card);margin-bottom:28px}
+  .rev-form h3{font-size:17px;margin-bottom:16px}
+  .star-pick{display:flex;gap:6px;font-size:30px;margin-bottom:16px;cursor:pointer}
+  .star-pick span{color:#3a3a3a;transition:.1s}
+  .star-pick span.on{color:#fff}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+
+  .rev-list{display:flex;flex-direction:column;gap:14px}
+  .review{border:1px solid var(--line);border-radius:14px;padding:18px 20px;background:var(--card)}
+  .review-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:12px}
+  .review-who{display:flex;align-items:center;gap:11px}
+  .avatar{
+    width:40px;height:40px;border-radius:50%;background:#fff;color:#000;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;
+  }
+  .review-who b{font-size:14px}
+  .review-who small{display:block;color:var(--muted);font-size:11px}
+  .review .stars{font-size:13px;letter-spacing:1px}
+  .review p{font-size:14px;color:#d4d4d4}
+
+  /* ===== CART DRAWER ===== */
+  .overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;
+    opacity:0;pointer-events:none;transition:.25s;backdrop-filter:blur(2px);
+  }
+  .overlay.open{opacity:1;pointer-events:auto}
+  .drawer{
+    position:fixed;top:0;right:0;height:100%;width:380px;max-width:90vw;z-index:100;
+    background:#080808;border-left:1px solid var(--line2);
+    transform:translateX(100%);transition:.3s cubic-bezier(.4,0,.2,1);
+    display:flex;flex-direction:column;
+  }
+  .drawer.open{transform:none}
+  .drawer-head{padding:20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+  .drawer-head h3{font-size:18px}
+  .close-x{font-size:24px;color:var(--muted);width:34px;height:34px;border-radius:8px}
+  .close-x:hover{background:#1a1a1a;color:#fff}
+  .drawer-body{flex:1;overflow-y:auto;padding:16px 20px}
+  .cart-item{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+  .cart-item .ci-img{width:50px;height:50px;border-radius:9px;background:#161616;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+  .cart-item .ci-info{flex:1;min-width:0}
+  .cart-item .ci-info b{font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cart-item .ci-info span{font-size:12px;color:var(--muted)}
+  .qty{display:flex;align-items:center;gap:8px}
+  .qty button{width:26px;height:26px;border:1px solid var(--line2);border-radius:7px;font-weight:700;font-size:15px}
+  .qty button:hover{background:#fff;color:#000}
+  .ci-del{color:var(--muted2);font-size:18px;padding:4px}
+  .ci-del:hover{color:#fff}
+  .drawer-foot{padding:20px;border-top:1px solid var(--line)}
+  .drawer-foot .row{display:flex;justify-content:space-between;margin-bottom:14px;font-size:15px}
+  .drawer-foot .row b{font-size:20px;font-weight:800}
+  .empty-cart{text-align:center;color:var(--muted);padding:50px 0;font-size:14px}
+
+  /* ===== TOAST ===== */
+  .toast{
+    position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(120px);
+    background:#fff;color:#000;padding:13px 22px;border-radius:12px;font-weight:700;font-size:14px;
+    z-index:200;transition:.3s;box-shadow:0 10px 40px rgba(0,0,0,.5);
+  }
+  .toast.show{transform:translateX(-50%) translateY(0)}
+
+  /* ===== FOOTER ===== */
+  footer{border-top:1px solid var(--line);padding:40px 20px;color:var(--muted);font-size:13px}
+  .foot-in{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+  .foot-in a:hover{color:#fff}
+  .foot-links{display:flex;gap:18px;flex-wrap:wrap}
+  .dev-credit{
+    max-width:1200px;margin:30px auto 0;padding-top:24px;
+    border-top:1px solid var(--line);text-align:center;
+  }
+  .dev-credit a{
+    display:inline-block;padding:12px 26px;border-radius:30px;
+    border:1px solid #fff;color:#fff;font-size:14px;letter-spacing:.3px;
+    animation:devGlow 2.6s ease-in-out infinite;transition:.2s;
+  }
+  .dev-credit a b{font-weight:800}
+  .dev-credit a:hover{background:#fff;color:#000;animation:none}
+  @keyframes devGlow{
+    0%,100%{box-shadow:0 0 0 rgba(255,255,255,0)}
+    50%{box-shadow:0 0 22px rgba(255,255,255,.45)}
+  }
+
+  /* ===== ADMIN ===== */
+  .card-img img{width:100%;height:100%;object-fit:cover}
+  .admin-bar{
+    position:fixed;bottom:20px;left:20px;z-index:80;
+    background:#fff;color:#000;border-radius:12px;padding:10px 16px;
+    font-size:13px;font-weight:700;display:flex;align-items:center;gap:12px;
+    box-shadow:0 10px 40px rgba(0,0,0,.6);
+  }
+  .admin-bar button{
+    border:1px solid #000;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;
+  }
+  .admin-bar button:hover{background:#000;color:#fff}
+  .admin-only{display:none}
+  body.admin .admin-only{display:inline-flex}
+  .card-admin{display:flex;gap:8px;margin-top:10px}
+  .card-admin button{
+    flex:1;border:1px solid var(--line2);border-radius:8px;padding:7px;font-size:12px;font-weight:600;color:var(--muted);
+  }
+  .card-admin button:hover{background:#fff;color:#000;border-color:#fff}
+  .rev-del{color:var(--muted2);font-size:16px;padding:4px 8px;border-radius:6px}
+  .rev-del:hover{background:#1a1a1a;color:#fff}
+  .rev-photo-previews{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .rev-photo-previews .thumb{
+    width:64px;height:64px;border-radius:10px;overflow:hidden;position:relative;border:1px solid var(--line2);
+  }
+  .rev-photo-previews .thumb img{width:100%;height:100%;object-fit:cover}
+  .rev-photo-previews .thumb button{
+    position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;
+    background:#000;color:#fff;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;
+  }
+  .review-photos{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .review-photos img{
+    width:88px;height:88px;object-fit:cover;border-radius:10px;border:1px solid var(--line);cursor:pointer;transition:.15s;
+  }
+  .review-photos img:hover{transform:scale(1.04);border-color:#555}
+  .lightbox{
+    position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.9);
+    display:none;align-items:center;justify-content:center;padding:30px;cursor:zoom-out;
+  }
+  .lightbox.open{display:flex}
+  .lightbox img{max-width:100%;max-height:100%;border-radius:12px}
+  .pmodal{
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.95);
+    width:440px;max-width:92vw;max-height:88vh;overflow-y:auto;z-index:110;
+    background:#0c0c0c;border:1px solid var(--line2);border-radius:18px;padding:24px;
+    opacity:0;pointer-events:none;transition:.2s;
+  }
+  .pmodal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+  .pmodal h3{margin-bottom:18px;font-size:18px}
+  .pmodal .field{margin-bottom:13px}
+  .pm-photo-preview{
+    width:90px;height:90px;border-radius:12px;background:#161616;border:1px solid var(--line2);
+    display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden;margin-bottom:8px;
+  }
+  .pm-photo-preview img{width:100%;height:100%;object-fit:cover}
+  .pm-actions{display:flex;gap:10px;margin-top:18px}
+  .pm-actions .btn{flex:1}
+
+  @media(max-width:560px){
+    .calc,.form-row{grid-template-columns:1fr}
+    .hero{padding:36px 24px}
+    .topbar{padding:12px 16px}
+    main,nav{padding-left:16px;padding-right:16px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="topbar">
+    <div class="logo" onclick="showTab('catalog')">
+      <div class="logo-mark">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter>
+          </defs>
+          <rect width="100" height="100" fill="#000"/>
+          <text x="50" y="40" font-family="Arial" font-weight="900" font-size="30" fill="#fff" text-anchor="middle" filter="url(#rough)">W</text>
+          <text x="50" y="68" font-family="Arial" font-weight="700" font-size="11" letter-spacing="1" fill="#e8e8e8" text-anchor="middle" filter="url(#rough)">MARKET</text>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <b>W MARKET</b>
+        <span>IN STOCK</span>
+      </div>
+    </div>
+    <button class="cart-btn" onclick="openCart()">
+      🛒 Корзина
+      <span class="cart-count" id="cartCount" style="display:none">0</span>
+    </button>
+  </div>
+  <nav>
+    <button class="tab active" data-tab="catalog" onclick="showTab('catalog')">Каталог · в наличии</button>
+    <button class="tab" data-tab="china" onclick="showTab('china')">Доставка из Китая</button>
+    <button class="tab" data-tab="reviews" onclick="showTab('reviews')">Отзывы</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ============ КАТАЛОГ ============ -->
+  <section class="section active" id="catalog">
+    <div class="hero">
+      <h1>Брендовая одежда<br>в наличии</h1>
+      <p>Товары на складе — отправка в день заказа. Проверенное качество, оригинал. Доставка по Беларуси и РФ.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="document.getElementById('catGrid').scrollIntoView({behavior:'smooth'})">Смотреть каталог</button>
+        <button class="btn btn-ghost" onclick="showTab('china')">Заказать из Китая →</button>
+      </div>
+    </div>
+
+    <div class="sec-head">
+      <div>
+        <h2>Каталог</h2>
+        <p>Всё, что есть на складе прямо сейчас</p>
+      </div>
+      <button class="btn btn-ghost admin-only" onclick="openProductModal('catalog')">+ Добавить товар</button>
+    </div>
+
+    <div class="filters">
+      <div class="search">
+        🔍 <input type="text" id="searchInput" placeholder="Поиск по товарам..." oninput="renderCatalog()">
+      </div>
+    </div>
+    <div class="filters" id="catFilters"></div>
+
+    <div class="grid" id="catGrid"></div>
+  </section>
+
+  <!-- ============ КИТАЙ ============ -->
+  <section class="section" id="china">
+    <div class="hero">
+      <h1>Доставка из Китая<br>под заказ</h1>
+      <p>Привезём любой товар с Poizon, Taobao, Pinduoduo и других площадок. Выкуп, проверка, доставка до двери — берём всё на себя.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'})">Рассчитать стоимость</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('chinaGrid').scrollIntoView({behavior:'smooth'})">Популярное под заказ</button>
+      </div>
+    </div>
+
+    <div class="sec-head"><div><h2>Как это работает</h2><p>4 шага до твоего заказа</p></div></div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><h4>Присылаешь ссылку</h4><p>Кидаешь ссылку на товар с любой площадки или просто фото.</p></div>
+      <div class="step"><div class="step-num">2</div><h4>Считаем цену</h4><p>Озвучиваем итог: товар + доставка. Без скрытых платежей.</p></div>
+      <div class="step"><div class="step-num">3</div><h4>Выкуп и проверка</h4><p>Выкупаем, проверяем на брак, фото перед отправкой.</p></div>
+      <div class="step"><div class="step-num">4</div><h4>Доставка</h4><p>Привозим в Беларусь / РФ. Срок 12–20 дней.</p></div>
+    </div>
+
+    <div class="sec-head"><div><h2>Калькулятор доставки</h2><p>Прикинь стоимость заранее</p></div></div>
+    <div class="calc" id="calc">
+      <div class="field">
+        <label>Стоимость товара (¥, юань)</label>
+        <input type="number" id="cnPrice" placeholder="например, 350" oninput="calcChina()">
+      </div>
+      <div class="field">
+        <label>Категория</label>
+        <select id="cnCat" onchange="calcChina()">
+          <option value="0.6">Одежда (лёгкая)</option>
+          <option value="1.2">Обувь / куртки</option>
+          <option value="2.0">Тяжёлое / габарит</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Вес, кг (примерно)</label>
+        <input type="number" id="cnWeight" placeholder="например, 1.5" value="1" oninput="calcChina()">
+      </div>
+      <div class="field">
+        <label>Способ доставки</label>
+        <select id="cnShip" onchange="calcChina()">
+          <option value="14">Авто (12–20 дней)</option>
+          <option value="22">Авиа (7–12 дней)</option>
+        </select>
+      </div>
+      <div class="field calc-full">
+        <label>Ссылка на товар (Poizon, Taobao, Pinduoduo…)</label>
+        <input type="text" id="cnLink" placeholder="https://... — вставь ссылку на нужный товар">
+      </div>
+      <div class="field calc-full">
+        <label>Или прикрепи фото товара (необязательно)</label>
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="pm-photo-preview" id="cnPhotoPreview" style="margin-bottom:0">📷</div>
+          <input type="file" id="cnPhoto" accept="image/*" onchange="cnPhotoPicked(this)">
+        </div>
+      </div>
+      <div class="calc-result">
+        <div class="total">Примерная итоговая стоимость
+          <b id="cnTotal">—</b>
+        </div>
+        <button class="btn btn-primary" onclick="orderChina()">Оформить заказ из Китая</button>
+      </div>
+    </div>
+
+    <div class="sec-head"><div><h2>Популярное под заказ</h2><p>Чаще всего везут это</p></div>
+      <button class="btn btn-ghost admin-only" onclick="openProductModal('china')">+ Добавить товар</button>
+    </div>
+    <div class="grid" id="chinaGrid"></div>
+  </section>
+
+  <!-- ============ ОТЗЫВЫ ============ -->
+  <section class="section" id="reviews">
+    <div class="sec-head"><div><h2>Отзывы</h2><p>Что говорят покупатели W Market</p></div></div>
+
+    <div class="rev-summary">
+      <div class="rev-score">
+        <div class="big" id="avgScore">5.0</div>
+        <div class="stars" id="avgStars">★★★★★</div>
+        <small id="revCount">0 отзывов</small>
+      </div>
+      <div class="rev-bars" id="revBars"></div>
+    </div>
+
+    <div class="rev-form">
+      <h3>Оставить отзыв</h3>
+      <div class="star-pick" id="starPick">
+        <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Имя</label><input type="text" id="revName" placeholder="Как тебя зовут"></div>
+        <div class="field"><label>Город (необязательно)</label><input type="text" id="revCity" placeholder="Минск, Москва..."></div>
+      </div>
+      <div class="field" style="margin-bottom:14px"><label>Отзыв</label><textarea id="revText" placeholder="Расскажи о покупке..."></textarea></div>
+      <div class="field" style="margin-bottom:16px">
+        <label>Добавить фото заказа (до 4 шт, необязательно)</label>
+        <input type="file" id="revPhotos" accept="image/*" multiple onchange="revPhotosPicked(this)">
+        <div class="rev-photo-previews" id="revPhotoPreviews"></div>
+      </div>
+      <button class="btn btn-primary" onclick="addReview()">Опубликовать отзыв</button>
+    </div>
+
+    <div class="rev-list" id="revList"></div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="foot-in">
+    <div>
+      <b style="color:#fff;letter-spacing:2px">W MARKET · IN STOCK</b><br>
+      Магазин одежды и доставка из Китая · Беларусь / РФ
+    </div>
+    <div class="foot-links">
+      <a href="https://t.me/wstockrb" target="_blank">Telegram-канал</a>
+      <a href="https://www.instagram.com/w.store.by?igsh=MWY2b2YxemU1YXRtdA%3D%3D&utm_source=qr" target="_blank">Instagram</a>
+      <a href="https://t.me/wstockmanager" target="_blank">Менеджер</a>
+      <a href="#" onclick="showTab('reviews');return false">Отзывы</a>
+      <a href="#" onclick="adminEntry();return false" title="Для администратора">⚙</a>
+    </div>
+  </div>
+  <div class="dev-credit">
+    <a href="https://t.me/vvsgermanchik" target="_blank">⚡ Разработка сайта — <b>Зументс Герман</b></a>
+  </div>
+</footer>
+
+<!-- CART -->
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h3>Корзина</h3>
+    <button class="close-x" onclick="closeCart()">×</button>
+  </div>
+  <div class="drawer-body" id="cartBody"></div>
+  <div class="drawer-foot">
+    <div class="row"><span>Итого</span><b id="cartTotal">0 BYN</b></div>
+    <button class="btn btn-primary" style="width:100%" onclick="checkout()">Оформить заказ</button>
+  </div>
+</aside>
+
+<!-- ADMIN -->
+<div class="admin-bar" id="adminBar" style="display:none">
+  ⚙ Режим администратора
+  <button onclick="adminLogout()">Выйти</button>
+</div>
+
+<div class="overlay" id="pmOverlay" onclick="closeProductModal()"></div>
+<div class="pmodal" id="pModal">
+  <h3 id="pmTitle">Товар</h3>
+  <div class="field">
+    <label>Фото товара</label>
+    <div class="pm-photo-preview" id="pmPreview">👕</div>
+    <input type="file" id="pmPhoto" accept="image/*" onchange="pmPhotoPicked(this)">
+  </div>
+  <div class="field"><label>Название</label><input type="text" id="pmName" placeholder="Худи oversize"></div>
+  <div class="form-row">
+    <div class="field"><label>Категория</label><input type="text" id="pmCat" placeholder="Худи"></div>
+    <div class="field"><label>Цена (BYN)</label><input type="text" id="pmPrice" placeholder="159 или «от 160»"></div>
+  </div>
+  <div class="form-row">
+    <div class="field"><label>Размеры</label><input type="text" id="pmSizes" placeholder="S–XL"></div>
+    <div class="field"><label>Эмодзи (если нет фото)</label><input type="text" id="pmEmoji" placeholder="🧥"></div>
+  </div>
+  <div class="field"><label>Бейдж (HIT / NEW, можно пусто)</label><input type="text" id="pmBadge" placeholder=""></div>
+  <div class="pm-actions">
+    <button class="btn btn-ghost" onclick="closeProductModal()">Отмена</button>
+    <button class="btn btn-primary" onclick="saveProduct()">Сохранить</button>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('open')"><img id="lightboxImg" src=""></div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDK (Google CDN, доступен в РБ) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script>
+  var firebaseConfig = {
+    apiKey: "AIzaSyC4Fqsbet8Me8bXjeCXqCj1-iO5eOYRS_E",
+    authDomain: "wmarket-e23ee.firebaseapp.com",
+    databaseURL: "https://wmarket-e23ee-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "wmarket-e23ee",
+    storageBucket: "wmarket-e23ee.firebasestorage.app",
+    messagingSenderId: "992415452191",
+    appId: "1:992415452191:web:d390a8b4e39dcc3c96d92a"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var FDB = firebase.database();
+  var FAUTH = firebase.auth();
+</script>
+
+<script>
+/* ============ ДАННЫЕ-ЗАГЛУШКИ (не используются при Firebase) ============ */
+const SEED_CATALOG = [
+  {id:1, name:"Худи oversize", cat:"Худи", price:159, sizes:"S–XL", emoji:"🧥", badge:"HIT"},
+  {id:2, name:"Футболка базовая", cat:"Футболки", price:59, sizes:"S–XXL", emoji:"👕", badge:""},
+  {id:3, name:"Кроссовки белые", cat:"Обувь", price:289, sizes:"39–45", emoji:"👟", badge:"NEW"},
+  {id:4, name:"Спортивные штаны", cat:"Штаны", price:129, sizes:"S–XL", emoji:"👖", badge:""},
+  {id:5, name:"Зимняя куртка", cat:"Верх", price:399, sizes:"M–XL", emoji:"🧥", badge:""},
+  {id:6, name:"Кепка чёрная", cat:"Аксессуары", price:45, sizes:"one size", emoji:"🧢", badge:""},
+  {id:7, name:"Рубашка oversize", cat:"Рубашки", price:119, sizes:"S–XL", emoji:"👔", badge:""},
+  {id:8, name:"Носки (3 пары)", cat:"Аксессуары", price:29, sizes:"39–44", emoji:"🧦", badge:""},
+  {id:9, name:"Шорты карго", cat:"Штаны", price:89, sizes:"S–XL", emoji:"🩳", badge:"NEW"},
+  {id:10, name:"Свитшот", cat:"Худи", price:139, sizes:"S–XL", emoji:"🧥", badge:""},
+];
+
+const SEED_CHINA = [
+  {id:101, name:"Кроссовки Poizon", cat:"Poizon", price:"от 220", sizes:"любой", emoji:"👟"},
+  {id:102, name:"Куртка с Taobao", cat:"Taobao", price:"от 180", sizes:"любой", emoji:"🧥"},
+  {id:103, name:"Сумка / рюкзак", cat:"Аксессуары", price:"от 120", sizes:"—", emoji:"🎒"},
+  {id:104, name:"Худи бренд", cat:"Poizon", price:"от 160", sizes:"любой", emoji:"🧥"},
+  {id:105, name:"Часы / гаджеты", cat:"Электроника", price:"от 90", sizes:"—", emoji:"⌚"},
+  {id:106, name:"Джинсы", cat:"Taobao", price:"от 110", sizes:"любой", emoji:"👖"},
+];
+
+const SEED_REVIEWS = [
+  {name:"Артём", city:"Минск", rating:5, text:"Брал худи и кроссы — пришло за 2 дня, всё оригинал. Топ магазин!", date:"2026-06-12"},
+  {name:"Дарья", city:"Москва", rating:5, text:"Заказывала куртку из Китая, привезли за 15 дней, упаковано идеально.", date:"2026-06-05"},
+  {name:"Влад", city:"Гомель", rating:4, text:"Хорошие цены, единственное — хотелось бы больше размеров в наличии.", date:"2026-05-28"},
+];
+
+/* ============ STATE ============ */
+let CATALOG = [];
+let CHINA = [];
+let reviews = [];
+let cart = JSON.parse(localStorage.getItem('wm_cart')||'{}');
+let pickedStars = 5;
+let activeFilter = 'Все';
+let ADMIN = false; // вошёл ли администратор (Firebase Auth)
+
+/* ============ ЗАГРУЗКА ИЗ FIREBASE ============ */
+function objToArr(o){ return o ? Object.values(o).sort((a,b)=>(b.id||0)-(a.id||0)) : []; }
+
+function initFirebase(){
+  // живые данные: каталог, доставка, отзывы обновляются у всех автоматически
+  FDB.ref('catalog').on('value', s=>{ CATALOG=objToArr(s.val()); renderFilters(); renderCatalog(); });
+  FDB.ref('china').on('value',   s=>{ CHINA=objToArr(s.val());   renderChina(); });
+  FDB.ref('reviews').on('value', s=>{ reviews=objToArr(s.val()); renderReviews(); });
+  // отслеживаем вход администратора
+  FAUTH.onAuthStateChanged(u=>{ ADMIN=!!u; rerenderAll(); });
+}
+function rerenderAll(){
+  renderFilters(); renderCatalog(); renderChina(); renderReviews(); renderAdmin();
+}
+
+/* ============ TABS ============ */
+function showTab(tab){
+  document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===tab));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ============ CATALOG ============ */
+function renderFilters(){
+  const cats = ['Все',...new Set(CATALOG.map(p=>p.cat))];
+  document.getElementById('catFilters').innerHTML = cats.map(c=>
+    `<button class="chip ${c===activeFilter?'active':''}" onclick="setFilter('${c}')">${c}</button>`).join('');
+}
+function setFilter(c){activeFilter=c;renderFilters();renderCatalog();}
+
+function renderCatalog(){
+  const q = (document.getElementById('searchInput').value||'').toLowerCase();
+  const items = CATALOG.filter(p=>
+    (activeFilter==='Все'||p.cat===activeFilter) &&
+    (p.name.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q)));
+  document.getElementById('catGrid').innerHTML = items.length ? items.map(p=>productCard(p,true)).join('')
+    : `<p style="color:var(--muted);padding:30px 0">Ничего не найдено 🤷</p>`;
+}
+function renderChina(){
+  document.getElementById('chinaGrid').innerHTML = CHINA.map(p=>productCard(p,false)).join('');
+}
+
+function productCard(p, buyable){
+  const inCart = cart[p.id];
+  return `<div class="card">
+    <div class="card-img">
+      ${p.badge?`<span class="badge ${p.badge==='NEW'?'dark':''}">${p.badge}</span>`:''}
+      ${p.photo?`<img src="${p.photo}" alt="${escapeHtml(p.name)}">`:`<span class="emoji">${p.emoji}</span>`}
+    </div>
+    <div class="card-body">
+      <div class="card-cat">${escapeHtml(p.cat)}</div>
+      <div class="card-name">${escapeHtml(p.name)}</div>
+      <div class="card-sizes">Размеры: ${escapeHtml(p.sizes)}</div>
+      <div class="card-foot">
+        <div class="price">${escapeHtml(String(p.price))} <small>BYN</small></div>
+        ${buyable
+          ? `<button class="add-btn ${inCart?'added':''}" onclick="addToCart(${p.id})">${inCart?'✓ В корзине':'+ В корзину'}</button>`
+          : `<button class="add-btn" onclick="orderChinaById(${p.id})">Заказать</button>`}
+      </div>
+      ${isAdmin()?`<div class="card-admin">
+        <button onclick="openProductModal('${buyable?'catalog':'china'}',${p.id})">✎ Изменить</button>
+        <button onclick="deleteProduct(${p.id})">🗑 Удалить</button>
+      </div>`:''}
+    </div>
+  </div>`;
+}
+
+/* ============ CART ============ */
+function findProduct(id){return CATALOG.find(p=>p.id===id);}
+function addToCart(id){
+  cart[id] = (cart[id]||0)+1;
+  saveCart(); renderCatalog(); renderCart();
+  toast('Добавлено в корзину');
+}
+function changeQty(id,d){
+  cart[id]=(cart[id]||0)+d;
+  if(cart[id]<=0) delete cart[id];
+  saveCart(); renderCart(); renderCatalog();
+}
+function removeItem(id){delete cart[id];saveCart();renderCart();renderCatalog();}
+function saveCart(){localStorage.setItem('wm_cart',JSON.stringify(cart));updateCartCount();}
+function updateCartCount(){
+  const n = Object.values(cart).reduce((a,b)=>a+b,0);
+  const el = document.getElementById('cartCount');
+  el.textContent=n; el.style.display = n?'flex':'none';
+}
+function cartTotal(){
+  return Object.entries(cart).reduce((sum,[id,q])=>{
+    const p=findProduct(+id); return sum+(p?p.price*q:0);},0);
+}
+function renderCart(){
+  const body=document.getElementById('cartBody');
+  const ids=Object.keys(cart);
+  if(!ids.length){body.innerHTML=`<div class="empty-cart">Корзина пуста 🛒<br><br>Загляни в каталог!</div>`;}
+  else{
+    body.innerHTML=ids.map(id=>{
+      const p=findProduct(+id);const q=cart[id];
+      return `<div class="cart-item">
+        <div class="ci-img">${p.emoji}</div>
+        <div class="ci-info"><b>${p.name}</b><span>${p.price} BYN</span></div>
+        <div class="qty">
+          <button onclick="changeQty(${id},-1)">−</button>
+          <span>${q}</span>
+          <button onclick="changeQty(${id},1)">+</button>
+        </div>
+        <button class="ci-del" onclick="removeItem(${id})">🗑</button>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('cartTotal').textContent=cartTotal()+' BYN';
+}
+function openCart(){renderCart();document.getElementById('overlay').classList.add('open');document.getElementById('drawer').classList.add('open');}
+function closeCart(){document.getElementById('overlay').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
+const MANAGER = 'wstockmanager'; // менеджер W Market в Telegram
+
+// Копирует текст заказа в буфер и открывает чат менеджера
+function contactManager(text){
+  try{ navigator.clipboard.writeText(text); }catch(e){}
+  window.open('https://t.me/'+MANAGER,'_blank');
+  toast('Текст заказа скопирован — вставьте его в чат менеджеру');
+}
+
+function checkout(){
+  if(!Object.keys(cart).length){toast('Корзина пуста');return;}
+  let msg='Здравствуйте! Хочу оформить заказ в W Market:\n\n';
+  Object.entries(cart).forEach(([id,q])=>{const p=findProduct(+id);msg+=`• ${p.name} ×${q} — ${p.price*q} BYN\n`;});
+  msg+=`\nИтого: ${cartTotal()} BYN`;
+  contactManager(msg);
+}
+
+/* ============ CHINA CALC ============ */
+function calcChina(){
+  const price=parseFloat(document.getElementById('cnPrice').value)||0;
+  const catK=parseFloat(document.getElementById('cnCat').value);
+  const weight=parseFloat(document.getElementById('cnWeight').value)||0;
+  const shipRate=parseFloat(document.getElementById('cnShip').value);
+  const YUAN_TO_BYN=0.42;         // курс юаня (примерно) → BYN
+  const goods=price*YUAN_TO_BYN;
+  const delivery=weight*shipRate*catK;
+  const fee=Math.max(goods*0.10,15); // комиссия выкупа 10%, мин 15
+  const total=Math.round(goods+delivery+fee);
+  document.getElementById('cnTotal').textContent = price? total+' BYN' : '—';
+}
+let cnPhotoData=null; // фото товара из калькулятора (для подсказки)
+function cnPhotoPicked(input){
+  const f=input.files&&input.files[0];
+  if(!f){cnPhotoData=null;document.getElementById('cnPhotoPreview').textContent='📷';return;}
+  const reader=new FileReader();
+  reader.onload=e=>{cnPhotoData=e.target.result;document.getElementById('cnPhotoPreview').innerHTML=`<img src="${cnPhotoData}">`;};
+  reader.readAsDataURL(f);
+}
+function orderChina(name){
+  const link=(document.getElementById('cnLink')?document.getElementById('cnLink').value.trim():'');
+  const total=document.getElementById('cnTotal')?document.getElementById('cnTotal').textContent:'';
+  let msg='Здравствуйте! Хочу заказать '+(name?`товар «${name}»`:'товар из Китая')+' через W Market.\n';
+  if(link) msg+='Ссылка на товар: '+link+'\n';
+  if(total && total!=='—') msg+='Примерный расчёт по калькулятору: '+total+'\n';
+  if(cnPhotoData) msg+='(фото товара приложу отдельным сообщением)\n';
+  contactManager(msg);
+  if(cnPhotoData) setTimeout(()=>toast('Не забудь отправить фото товара в чат 📷'),2600);
+}
+function orderChinaById(id){
+  const p = CHINA.find(x=>x.id===id);
+  orderChina(p?p.name:'');
+}
+
+/* ============ REVIEWS ============ */
+function saveReviews(){localStorage.setItem('wm_reviews',JSON.stringify(reviews));}
+function starStr(n){return '★★★★★☆☆☆☆☆'.slice(5-n,10-n);}
+function renderReviews(){
+  const list=document.getElementById('revList');
+  list.innerHTML=reviews.map(r=>`
+    <div class="review">
+      <div class="review-top">
+        <div class="review-who">
+          <div class="avatar">${(r.name||'?')[0].toUpperCase()}</div>
+          <div><b>${escapeHtml(r.name)}</b><small>${r.city?escapeHtml(r.city)+' · ':''}${fmtDate(r.date)}</small></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="stars">${starStr(r.rating)}</div>
+          ${isAdmin()&&r.id?`<button class="rev-del" onclick="deleteReview(${r.id})" title="Удалить отзыв">🗑</button>`:''}
+        </div>
+      </div>
+      <p>${escapeHtml(r.text)}</p>
+      ${(r.photos&&r.photos.length)?`<div class="review-photos">${r.photos.map(src=>`<img src="${src}" onclick="openLightbox('${src}')" alt="фото заказа">`).join('')}</div>`:''}
+    </div>`).join('');
+
+  // summary
+  const n=reviews.length;
+  const avg=n?reviews.reduce((a,r)=>a+r.rating,0)/n:5;
+  document.getElementById('avgScore').textContent=avg.toFixed(1);
+  document.getElementById('avgStars').textContent=starStr(Math.round(avg));
+  document.getElementById('revCount').textContent=n+' '+plural(n,'отзыв','отзыва','отзывов');
+  // bars
+  let bars='';
+  for(let s=5;s>=1;s--){
+    const c=reviews.filter(r=>r.rating===s).length;
+    const pct=n?Math.round(c/n*100):0;
+    bars+=`<div class="rev-bar"><span>${s}★</span><div class="track"><div class="fill" style="width:${pct}%"></div></div><span>${c}</span></div>`;
+  }
+  document.getElementById('revBars').innerHTML=bars;
+}
+/* фото к отзыву */
+let revPhotoData=[]; // массив dataURL
+async function revPhotosPicked(input){
+  const files=Array.from(input.files||[]).slice(0,4);
+  revPhotoData=[];
+  document.getElementById('revPhotoPreviews').innerHTML='';
+  for(const f of files){
+    try{
+      const data=await compressImage(f, 900, 0.7);
+      revPhotoData.push(data);
+      renderRevPhotoPreviews();
+    }catch(e){ toast('Не удалось обработать фото'); }
+  }
+}
+function renderRevPhotoPreviews(){
+  const prev=document.getElementById('revPhotoPreviews');
+  prev.innerHTML=revPhotoData.map((src,i)=>`<div class="thumb"><img src="${src}"><button onclick="removeRevPhoto(${i})" title="убрать">×</button></div>`).join('');
+}
+function removeRevPhoto(i){revPhotoData.splice(i,1);renderRevPhotoPreviews();}
+
+function openLightbox(src){
+  document.getElementById('lightboxImg').src=src;
+  document.getElementById('lightbox').classList.add('open');
+}
+
+async function addReview(){
+  const name=document.getElementById('revName').value.trim();
+  const city=document.getElementById('revCity').value.trim();
+  const text=document.getElementById('revText').value.trim();
+  if(!name||!text){toast('Заполни имя и текст отзыва');return;}
+  const id=Date.now();
+  const rev={id:id,name:name,city:city,rating:pickedStars,text:text,date:new Date().toISOString().slice(0,10)};
+  if(revPhotoData.length) rev.photos=revPhotoData.slice(0,4);
+  try{
+    await FDB.ref('reviews/'+id).set(rev);
+  }catch(e){toast('Не удалось отправить отзыв, попробуй ещё раз');return;}
+  document.getElementById('revName').value='';
+  document.getElementById('revCity').value='';
+  document.getElementById('revText').value='';
+  document.getElementById('revPhotos').value='';
+  revPhotoData=[];
+  renderRevPhotoPreviews();
+  toast('Спасибо за отзыв!');
+}
+
+/* star picker */
+document.getElementById('starPick').addEventListener('click',e=>{
+  if(e.target.dataset.v){pickedStars=+e.target.dataset.v;paintStars();}
+});
+function paintStars(){
+  document.querySelectorAll('#starPick span').forEach(s=>s.classList.toggle('on',+s.dataset.v<=pickedStars));
+}
+
+/* ============ HELPERS ============ */
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);
+}
+function escapeHtml(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function plural(n,one,few,many){const n10=n%10,n100=n%100;if(n10===1&&n100!==11)return one;if(n10>=2&&n10<=4&&(n100<10||n100>=20))return few;return many;}
+function fmtDate(d){try{return new Date(d).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});}catch(e){return d;}}
+
+/* ============ АДМИНКА ============ */
+function isAdmin(){return ADMIN;}
+
+function renderAdmin(){
+  document.getElementById('adminBar').style.display = isAdmin()?'flex':'none';
+  document.body.classList.toggle('admin', isAdmin());
+}
+
+async function adminEntry(){
+  if(isAdmin()){adminLogout();return;}
+  const email=prompt('Email администратора:');
+  if(!email) return;
+  const pass=prompt('Пароль:');
+  if(!pass) return;
+  try{
+    await FAUTH.signInWithEmailAndPassword(email.trim(), pass);
+    toast('Режим администратора включён');
+    // onAuthStateChanged сам обновит интерфейс
+  }catch(e){ toast('Неверный email или пароль'); }
+}
+function adminLogout(){
+  FAUTH.signOut();
+  toast('Вышел из режима администратора');
+}
+
+/* --- товар: добавить / изменить --- */
+let pmSection='catalog', pmId=null, pmPhotoData=null;
+
+function openProductModal(section,id){
+  pmSection=section; pmId=id||null; pmPhotoData=null;
+  const p=id?(section==='china'?CHINA:CATALOG).find(x=>x.id===id):null;
+  document.getElementById('pmTitle').textContent = p?'Изменить товар':'Новый товар'+(section==='china'?' (под заказ из Китая)':' (в наличии)');
+  document.getElementById('pmName').value=p?p.name:'';
+  document.getElementById('pmCat').value=p?p.cat:'';
+  document.getElementById('pmPrice').value=p?p.price:'';
+  document.getElementById('pmSizes').value=p?p.sizes:'';
+  document.getElementById('pmEmoji').value=p?p.emoji:'';
+  document.getElementById('pmBadge').value=p&&p.badge?p.badge:'';
+  document.getElementById('pmPhoto').value='';
+  const prev=document.getElementById('pmPreview');
+  if(p&&p.photo){prev.innerHTML=`<img src="${p.photo}">`;}
+  else{prev.textContent=p&&p.emoji?p.emoji:'👕';}
+  document.getElementById('pmOverlay').classList.add('open');
+  document.getElementById('pModal').classList.add('open');
+}
+function closeProductModal(){
+  document.getElementById('pmOverlay').classList.remove('open');
+  document.getElementById('pModal').classList.remove('open');
+}
+// Сжатие фото до разумного размера (для лимитов Firebase) → dataURL(jpeg)
+function compressImage(file, maxSize, quality){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.width, h=img.height;
+        if(w>h && w>maxSize){ h=Math.round(h*maxSize/w); w=maxSize; }
+        else if(h>=w && h>maxSize){ w=Math.round(w*maxSize/h); h=maxSize; }
+        const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+        cv.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(cv.toDataURL('image/jpeg', quality||0.7));
+      };
+      img.onerror=reject; img.src=e.target.result;
+    };
+    reader.onerror=reject; reader.readAsDataURL(file);
+  });
+}
+async function pmPhotoPicked(input){
+  const f=input.files&&input.files[0];
+  if(!f) return;
+  try{
+    pmPhotoData=await compressImage(f, 800, 0.72);
+    document.getElementById('pmPreview').innerHTML=`<img src="${pmPhotoData}">`;
+  }catch(e){ toast('Не удалось обработать фото'); }
+}
+async function saveProduct(){
+  if(!isAdmin()){toast('Только для администратора');return;}
+  const priceRaw=document.getElementById('pmPrice').value.trim();
+  const priceNum=parseFloat(priceRaw.replace(',','.'));
+  const id = pmId || Date.now();
+  const product={
+    id:id,
+    name:document.getElementById('pmName').value.trim(),
+    cat:document.getElementById('pmCat').value.trim()||'Разное',
+    price:(priceRaw!=='' && !isNaN(priceNum) && /^[\d.,]+$/.test(priceRaw)) ? priceNum : (priceRaw||'—'),
+    sizes:document.getElementById('pmSizes').value.trim()||'—',
+    emoji:document.getElementById('pmEmoji').value.trim()||'👕',
+    badge:document.getElementById('pmBadge').value.trim()
+  };
+  if(!product.name){toast('Укажи название товара');return;}
+  const existing=(pmSection==='china'?CHINA:CATALOG).find(x=>x.id===id);
+  if(pmPhotoData) product.photo=pmPhotoData;
+  else if(existing && existing.photo) product.photo=existing.photo;
+  try{
+    await FDB.ref(pmSection+'/'+id).set(product);
+    closeProductModal();
+    toast(pmId?'Товар обновлён':'Товар добавлен');
+  }catch(e){toast('Не удалось сохранить товар');}
+}
+async function deleteProduct(id){
+  if(!isAdmin()){toast('Только для администратора');return;}
+  if(!confirm('Удалить этот товар?')) return;
+  try{
+    await FDB.ref('catalog/'+id).remove();
+    await FDB.ref('china/'+id).remove();
+    delete cart[id]; saveCart();
+    toast('Товар удалён');
+  }catch(e){toast('Не удалось удалить');}
+}
+async function deleteReview(id){
+  if(!isAdmin()){toast('Только для администратора');return;}
+  if(!confirm('Удалить этот отзыв?')) return;
+  try{
+    await FDB.ref('reviews/'+id).remove();
+    toast('Отзыв удалён');
+  }catch(e){toast('Не удалось удалить');}
+}
+
+/* ============ INIT ============ */
+renderFilters();
+renderCatalog();
+renderChina();
+renderReviews();
+renderAdmin();
+paintStars();
+updateCartCount();
+initFirebase(); // подключаемся к базе Firebase — живые данные для всех
+</script>
+</body>
+</html>
