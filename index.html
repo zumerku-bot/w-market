@@ -147,6 +147,8 @@
   .card-cat{font-size:11px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
   .card-name{font-size:15px;font-weight:700;margin:5px 0 2px}
   .card-sizes{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .card-link{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line2);padding-bottom:1px;margin-bottom:12px;transition:color .15s,border-color .15s}
+  .card-link:hover{color:var(--fg);border-color:var(--fg)}
   .card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;gap:10px}
   .price{font-size:18px;font-weight:800}
   .price small{font-size:12px;color:var(--muted);font-weight:500}
@@ -644,6 +646,7 @@
     <div class="field"><label>Эмодзи (если нет фото)</label><input type="text" id="pmEmoji" placeholder="🧥"></div>
   </div>
   <div class="field"><label>Бейдж (HIT / NEW, можно пусто)</label><input type="text" id="pmBadge" placeholder=""></div>
+  <div class="field"><label>Ссылка на товар (можно пусто)</label><input type="url" id="pmLink" placeholder="https://..."></div>
   <div class="pm-actions">
     <button class="btn btn-ghost" onclick="closeProductModal()">Отмена</button>
     <button class="btn btn-primary" onclick="saveProduct()">Сохранить</button>
@@ -774,6 +777,7 @@ function productCard(p, section){
       <div class="card-cat">${escapeHtml(p.cat)}</div>
       <div class="card-name">${escapeHtml(p.name)}</div>
       <div class="card-sizes">Размеры: ${escapeHtml(p.sizes)}</div>
+      ${safeLink(p.link)?`<a class="card-link" href="${safeLink(p.link)}" target="_blank" rel="noopener noreferrer">🔗 Ссылка на товар</a>`:''}
       <div class="card-foot">
         <div class="price">${escapeHtml(String(p.price))} <small>BYN</small></div>
         ${orderBtn}
@@ -1027,6 +1031,11 @@ function safePhoto(u){
   if(/^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(u)) return u;
   return '';
 }
+// Ссылка на товар: пропускаем только http/https (без javascript:, data: и пр.). Иначе — пусто.
+function safeLink(u){
+  u = String(u||'').trim();
+  return /^https?:\/\/[^\s"'<>]+$/.test(u) ? u : '';
+}
 function plural(n,one,few,many){const n10=n%10,n100=n%100;if(n10===1&&n100!==11)return one;if(n10>=2&&n10<=4&&(n100<10||n100>=20))return few;return many;}
 function fmtDate(d){try{return new Date(d).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});}catch(e){return d;}}
 
@@ -1070,6 +1079,7 @@ function openProductModal(section,id){
   document.getElementById('pmSizes').value=p?p.sizes:'';
   document.getElementById('pmEmoji').value=p?p.emoji:'';
   document.getElementById('pmBadge').value=p&&p.badge?p.badge:'';
+  document.getElementById('pmLink').value=p&&p.link?p.link:'';
   document.getElementById('pmPhoto').value='';
   const prev=document.getElementById('pmPreview');
   if(p&&safePhoto(p.photo)){prev.innerHTML=`<img src="${safePhoto(p.photo)}">`;}
@@ -1123,6 +1133,8 @@ async function saveProduct(){
     badge:document.getElementById('pmBadge').value.trim()
   };
   if(!product.name){toast('Укажи название товара');return;}
+  const link=document.getElementById('pmLink').value.trim();
+  if(link){ if(!safeLink(link)){toast('Ссылка должна начинаться с http:// или https://');return;} product.link=link; }
   const existing=sectionArr(pmSection).find(x=>x.id===id);
   if(pmPhotoData) product.photo=pmPhotoData;
   else if(existing && existing.photo) product.photo=existing.photo;
