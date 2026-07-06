@@ -990,10 +990,14 @@ async function addReview(){
   const city=document.getElementById('revCity').value.trim();
   const text=document.getElementById('revText').value.trim();
   if(!name||!text){toast('Заполни имя и текст отзыва');return;}
+  if(name.length>40||city.length>40){toast('Имя или город слишком длинные');return;}
+  if(text.length>600){toast('Отзыв слишком длинный (макс. 600 символов)');return;}
   const id=Date.now();
   const rev={id:id,name:name,city:city,rating:pickedStars,text:text,date:new Date().toISOString().slice(0,10)};
   if(revPhotoData.length) rev.photos=revPhotoData.slice(0,4);
   try{
+    // молча берём гостевой пропуск Firebase — чтобы правила БД отличали сайт от бота
+    if(FAUTH && !FAUTH.currentUser){ try{ await FAUTH.signInAnonymously(); }catch(e){} }
     await FDB.ref('reviews/'+id).set(rev);
   }catch(e){toast('Не удалось отправить отзыв, попробуй ещё раз');return;}
   document.getElementById('revName').value='';
