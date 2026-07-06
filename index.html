@@ -147,6 +147,7 @@
   .card-cat{font-size:11px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
   .card-name{font-size:15px;font-weight:700;margin:5px 0 2px}
   .card-sizes{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .order-preview{white-space:pre-wrap;background:#000;border:1px solid var(--line2);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--muted);max-height:190px;overflow:auto;margin-bottom:16px}
   .card-link{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line2);padding-bottom:1px;margin-bottom:12px;transition:color .15s,border-color .15s}
   .card-link:hover{color:var(--fg);border-color:var(--fg)}
   .card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;gap:10px}
@@ -655,6 +656,22 @@
 
 <div class="lightbox" id="lightbox" onclick="this.classList.remove('open')"><img id="lightboxImg" src=""></div>
 
+<!-- Подтверждение заказа: понятно показываем, что текст скопирован, и ведём в чат менеджера -->
+<div class="overlay" id="orderOverlay" onclick="closeOrderModal()"></div>
+<div class="pmodal" id="orderModal">
+  <h3>Заказ готов ✅</h3>
+  <p style="color:var(--muted);font-size:13.5px;line-height:1.5;margin:8px 0 14px">
+    Текст заказа <b style="color:#fff">скопирован</b>. Нажмите кнопку ниже — откроется чат менеджера,
+    там <b style="color:#fff">вставьте</b> сообщение и отправьте.<br>
+    <span style="color:var(--muted2)">На телефоне: зажать поле ввода → «Вставить».</span>
+  </p>
+  <div id="orderPreview" class="order-preview"></div>
+  <div class="pm-actions">
+    <button class="btn btn-ghost" onclick="closeOrderModal()">Закрыть</button>
+    <button class="btn btn-primary" onclick="openManagerChat()">💬 Открыть чат менеджера</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- Firebase SDK (Google CDN, доступен в РБ) -->
@@ -847,14 +864,28 @@ async function sendOrder(text){
     return true;
   }catch(e){ return false; }
 }
-// Доставляет заказ менеджеру через бота и параллельно открывает чат + копирует текст (запасной путь)
+// Текст текущего заказа (для окна подтверждения)
+let pendingOrderText='';
+// Показываем понятное окно: заказ скопирован → кнопка ведёт в чат менеджера.
+// Параллельно (если настроен бот) заказ уходит менеджеру сам через Firebase.
 function contactManager(text){
-  sendOrder(text).then(ok=>{
-    toast(ok ? 'Заказ отправлен менеджеру ✓ Чат открыт — можно написать там'
-             : 'Текст заказа скопирован — вставьте его в чат менеджеру');
-  });
-  try{ navigator.clipboard.writeText(text); }catch(e){}
+  pendingOrderText=text;
+  try{ navigator.clipboard.writeText(text); }catch(e){}   // копируем сразу (жест пользователя ещё активен)
+  sendOrder(text);                                         // фоновая авто-доставка (если включена)
+  document.getElementById('orderPreview').textContent=text;
+  document.getElementById('orderOverlay').classList.add('open');
+  document.getElementById('orderModal').classList.add('open');
+}
+function closeOrderModal(){
+  document.getElementById('orderOverlay').classList.remove('open');
+  document.getElementById('orderModal').classList.remove('open');
+}
+// Открывает чат менеджера. Ещё раз копируем текст — так надёжнее в мобильных браузерах.
+function openManagerChat(){
+  try{ navigator.clipboard.writeText(pendingOrderText); }catch(e){}
+  closeOrderModal();
   window.open('https://t.me/'+MANAGER,'_blank');
+  toast('Чат открыт — вставьте заказ и отправьте');
 }
 
 function checkout(){
