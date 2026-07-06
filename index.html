@@ -377,6 +377,7 @@
   <nav>
     <button class="tab active" data-tab="catalog" onclick="showTab('catalog')">Каталог · в наличии</button>
     <button class="tab" data-tab="china" onclick="showTab('china')">Доставка из Китая</button>
+    <button class="tab" data-tab="europe" onclick="showTab('europe')">Доставка из Европы</button>
     <button class="tab" data-tab="reviews" onclick="showTab('reviews')">Отзывы</button>
   </nav>
 </header>
@@ -479,6 +480,75 @@
       <button class="btn btn-ghost admin-only" onclick="openProductModal('china')">+ Добавить товар</button>
     </div>
     <div class="grid" id="chinaGrid"></div>
+  </section>
+
+  <!-- ============ ДОСТАВКА ИЗ ЕВРОПЫ ============ -->
+  <section class="section" id="europe">
+    <div class="hero">
+      <h1>Доставка из Европы<br>под заказ</h1>
+      <p>Привезём любой товар с eBay, Vinted, Zalando, ASOS и других европейских маркетплейсов. Выкуп, проверка, доставка до двери — берём всё на себя.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="document.getElementById('euCalc').scrollIntoView({behavior:'smooth'})">Рассчитать стоимость</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('europeGrid').scrollIntoView({behavior:'smooth'})">Популярное под заказ</button>
+      </div>
+    </div>
+
+    <div class="sec-head"><div><h2>Как это работает</h2><p>4 шага до твоего заказа</p></div></div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><h4>Присылаешь ссылку</h4><p>Кидаешь ссылку на товар с eBay, Vinted и других площадок или фото.</p></div>
+      <div class="step"><div class="step-num">2</div><h4>Считаем цену</h4><p>Озвучиваем итог: товар + доставка. Без скрытых платежей.</p></div>
+      <div class="step"><div class="step-num">3</div><h4>Выкуп и проверка</h4><p>Выкупаем, проверяем на брак, фото перед отправкой.</p></div>
+      <div class="step"><div class="step-num">4</div><h4>Доставка</h4><p>Привозим в Беларусь / РФ. Срок 10–18 дней.</p></div>
+    </div>
+
+    <div class="sec-head"><div><h2>Калькулятор доставки</h2><p>Прикинь стоимость заранее</p></div></div>
+    <div class="calc" id="euCalc">
+      <div class="field">
+        <label>Стоимость товара (€, евро)</label>
+        <input type="number" id="euPrice" placeholder="например, 120" oninput="calcEurope()">
+      </div>
+      <div class="field">
+        <label>Категория</label>
+        <select id="euCat" onchange="calcEurope()">
+          <option value="0.6">Одежда (лёгкая)</option>
+          <option value="1.2">Обувь / куртки</option>
+          <option value="2.0">Тяжёлое / габарит</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Вес, кг (примерно)</label>
+        <input type="number" id="euWeight" placeholder="например, 1.5" value="1" oninput="calcEurope()">
+      </div>
+      <div class="field">
+        <label>Способ доставки</label>
+        <select id="euShip" onchange="calcEurope()">
+          <option value="18">Авто (10–18 дней)</option>
+          <option value="28">Авиа (7–12 дней)</option>
+        </select>
+      </div>
+      <div class="field calc-full">
+        <label>Ссылка на товар (eBay, Vinted, Zalando…)</label>
+        <input type="text" id="euLink" placeholder="https://... — вставь ссылку на нужный товар">
+      </div>
+      <div class="field calc-full">
+        <label>Или прикрепи фото товара (необязательно)</label>
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="pm-photo-preview" id="euPhotoPreview" style="margin-bottom:0">📷</div>
+          <input type="file" id="euPhoto" accept="image/*" onchange="euPhotoPicked(this)">
+        </div>
+      </div>
+      <div class="calc-result">
+        <div class="total">Примерная итоговая стоимость
+          <b id="euTotal">—</b>
+        </div>
+        <button class="btn btn-primary" onclick="orderEurope()">Оформить заказ из Европы</button>
+      </div>
+    </div>
+
+    <div class="sec-head"><div><h2>Популярное под заказ</h2><p>Чаще всего везут это</p></div>
+      <button class="btn btn-ghost admin-only" onclick="openProductModal('europe')">+ Добавить товар</button>
+    </div>
+    <div class="grid" id="europeGrid"></div>
   </section>
 
   <!-- ============ ОТЗЫВЫ ============ -->
@@ -636,6 +706,7 @@ const SEED_REVIEWS = [
 /* ============ STATE ============ */
 let CATALOG = [];
 let CHINA = [];
+let EUROPE = [];
 let reviews = [];
 let cart = JSON.parse(localStorage.getItem('wm_cart')||'{}');
 let pickedStars = 5;
@@ -649,12 +720,13 @@ function initFirebase(){
   // живые данные: каталог, доставка, отзывы обновляются у всех автоматически
   FDB.ref('catalog').on('value', s=>{ CATALOG=objToArr(s.val()); renderFilters(); renderCatalog(); });
   FDB.ref('china').on('value',   s=>{ CHINA=objToArr(s.val());   renderChina(); });
+  FDB.ref('europe').on('value',  s=>{ EUROPE=objToArr(s.val());  renderEurope(); });
   FDB.ref('reviews').on('value', s=>{ reviews=objToArr(s.val()); renderReviews(); });
   // отслеживаем вход администратора
   FAUTH.onAuthStateChanged(u=>{ ADMIN=!!u; rerenderAll(); });
 }
 function rerenderAll(){
-  renderFilters(); renderCatalog(); renderChina(); renderReviews(); renderAdmin();
+  renderFilters(); renderCatalog(); renderChina(); renderEurope(); renderReviews(); renderAdmin();
 }
 
 /* ============ TABS ============ */
@@ -677,15 +749,22 @@ function renderCatalog(){
   const items = CATALOG.filter(p=>
     (activeFilter==='Все'||p.cat===activeFilter) &&
     (p.name.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q)));
-  document.getElementById('catGrid').innerHTML = items.length ? items.map(p=>productCard(p,true)).join('')
+  document.getElementById('catGrid').innerHTML = items.length ? items.map(p=>productCard(p,'catalog')).join('')
     : `<p style="color:var(--muted);padding:30px 0">Ничего не найдено 🤷</p>`;
 }
 function renderChina(){
-  document.getElementById('chinaGrid').innerHTML = CHINA.map(p=>productCard(p,false)).join('');
+  document.getElementById('chinaGrid').innerHTML = CHINA.map(p=>productCard(p,'china')).join('');
+}
+function renderEurope(){
+  document.getElementById('europeGrid').innerHTML = EUROPE.map(p=>productCard(p,'europe')).join('');
 }
 
-function productCard(p, buyable){
+function productCard(p, section){
+  // section: 'catalog' (в корзину) | 'china' | 'europe' (заказ у менеджера)
   const inCart = cart[p.id];
+  const orderBtn = section==='catalog'
+    ? `<button class="add-btn ${inCart?'added':''}" onclick="addToCart(${p.id})">${inCart?'✓ В корзине':'+ В корзину'}</button>`
+    : `<button class="add-btn" onclick="orderRequestById('${section}',${p.id})">Заказать</button>`;
   return `<div class="card">
     <div class="card-img">
       ${p.badge?`<span class="badge ${p.badge==='NEW'?'dark':''}">${escapeHtml(p.badge)}</span>`:''}
@@ -697,12 +776,10 @@ function productCard(p, buyable){
       <div class="card-sizes">Размеры: ${escapeHtml(p.sizes)}</div>
       <div class="card-foot">
         <div class="price">${escapeHtml(String(p.price))} <small>BYN</small></div>
-        ${buyable
-          ? `<button class="add-btn ${inCart?'added':''}" onclick="addToCart(${p.id})">${inCart?'✓ В корзине':'+ В корзину'}</button>`
-          : `<button class="add-btn" onclick="orderChinaById(${p.id})">Заказать</button>`}
+        ${orderBtn}
       </div>
       ${isAdmin()?`<div class="card-admin">
-        <button onclick="openProductModal('${buyable?'catalog':'china'}',${p.id})">✎ Изменить</button>
+        <button onclick="openProductModal('${section}',${p.id})">✎ Изменить</button>
         <button onclick="deleteProduct(${p.id})">🗑 Удалить</button>
       </div>`:''}
     </div>
@@ -806,6 +883,43 @@ function orderChina(name){
 function orderChinaById(id){
   const p = CHINA.find(x=>x.id===id);
   orderChina(p?p.name:'');
+}
+
+/* ============ КАЛЬКУЛЯТОР ЕВРОПЫ ============ */
+function calcEurope(){
+  const price=parseFloat(document.getElementById('euPrice').value)||0;
+  const catK=parseFloat(document.getElementById('euCat').value);
+  const weight=parseFloat(document.getElementById('euWeight').value)||0;
+  const shipRate=parseFloat(document.getElementById('euShip').value);
+  const EUR_TO_BYN=3.5;            // курс евро (примерно) → BYN
+  const goods=price*EUR_TO_BYN;
+  const delivery=weight*shipRate*catK;
+  const fee=Math.max(goods*0.10,20); // комиссия выкупа 10%, мин 20
+  const total=Math.round(goods+delivery+fee);
+  document.getElementById('euTotal').textContent = price? total+' BYN' : '—';
+}
+let euPhotoData=null;
+function euPhotoPicked(input){
+  const f=input.files&&input.files[0];
+  if(!f){euPhotoData=null;document.getElementById('euPhotoPreview').textContent='📷';return;}
+  const reader=new FileReader();
+  reader.onload=e=>{euPhotoData=e.target.result;document.getElementById('euPhotoPreview').innerHTML=`<img src="${euPhotoData}">`;};
+  reader.readAsDataURL(f);
+}
+function orderEurope(name){
+  const link=(document.getElementById('euLink')?document.getElementById('euLink').value.trim():'');
+  const total=document.getElementById('euTotal')?document.getElementById('euTotal').textContent:'';
+  let msg='Здравствуйте! Хочу заказать '+(name?`товар «${name}»`:'товар из Европы')+' через W Market.\n';
+  if(link) msg+='Ссылка на товар: '+link+'\n';
+  if(total && total!=='—') msg+='Примерный расчёт по калькулятору: '+total+'\n';
+  if(euPhotoData) msg+='(фото товара приложу отдельным сообщением)\n';
+  contactManager(msg);
+  if(euPhotoData) setTimeout(()=>toast('Не забудь отправить фото товара в чат 📷'),2600);
+}
+// Заказ товара из карточки (Китай или Европа)
+function orderRequestById(section, id){
+  if(section==='europe'){ const p=EUROPE.find(x=>x.id===id); orderEurope(p?p.name:''); }
+  else { const p=CHINA.find(x=>x.id===id); orderChina(p?p.name:''); }
 }
 
 /* ============ REVIEWS ============ */
@@ -944,10 +1058,12 @@ function adminLogout(){
 /* --- товар: добавить / изменить --- */
 let pmSection='catalog', pmId=null, pmPhotoData=null;
 
+function sectionArr(section){ return section==='china'?CHINA : section==='europe'?EUROPE : CATALOG; }
 function openProductModal(section,id){
   pmSection=section; pmId=id||null; pmPhotoData=null;
-  const p=id?(section==='china'?CHINA:CATALOG).find(x=>x.id===id):null;
-  document.getElementById('pmTitle').textContent = p?'Изменить товар':'Новый товар'+(section==='china'?' (под заказ из Китая)':' (в наличии)');
+  const p=id?sectionArr(section).find(x=>x.id===id):null;
+  const suffix = section==='china'?' (под заказ из Китая)' : section==='europe'?' (под заказ из Европы)' : ' (в наличии)';
+  document.getElementById('pmTitle').textContent = p?'Изменить товар':'Новый товар'+suffix;
   document.getElementById('pmName').value=p?p.name:'';
   document.getElementById('pmCat').value=p?p.cat:'';
   document.getElementById('pmPrice').value=p?p.price:'';
@@ -1007,7 +1123,7 @@ async function saveProduct(){
     badge:document.getElementById('pmBadge').value.trim()
   };
   if(!product.name){toast('Укажи название товара');return;}
-  const existing=(pmSection==='china'?CHINA:CATALOG).find(x=>x.id===id);
+  const existing=sectionArr(pmSection).find(x=>x.id===id);
   if(pmPhotoData) product.photo=pmPhotoData;
   else if(existing && existing.photo) product.photo=existing.photo;
   try{
@@ -1022,6 +1138,7 @@ async function deleteProduct(id){
   try{
     await FDB.ref('catalog/'+id).remove();
     await FDB.ref('china/'+id).remove();
+    await FDB.ref('europe/'+id).remove();
     delete cart[id]; saveCart();
     toast('Товар удалён');
   }catch(e){toast('Не удалось удалить');}
@@ -1039,6 +1156,7 @@ async function deleteReview(id){
 renderFilters();
 renderCatalog();
 renderChina();
+renderEurope();
 renderReviews();
 renderAdmin();
 paintStars();
