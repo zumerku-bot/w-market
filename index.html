@@ -838,11 +838,23 @@ function openCart(){renderCart();document.getElementById('overlay').classList.ad
 function closeCart(){document.getElementById('overlay').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
 const MANAGER = 'wstockmanager'; // менеджер W Market в Telegram
 
-// Копирует текст заказа в буфер и открывает чат менеджера
+// Отправляет заказ менеджеру через бота (Firebase /orders → бот пересылает)
+async function sendOrder(text){
+  const id=Date.now();
+  try{
+    if(FAUTH && !FAUTH.currentUser){ try{ await FAUTH.signInAnonymously(); }catch(e){} }
+    await FDB.ref('orders/'+id).set({ text:String(text).slice(0,1500), ts:id });
+    return true;
+  }catch(e){ return false; }
+}
+// Доставляет заказ менеджеру через бота и параллельно открывает чат + копирует текст (запасной путь)
 function contactManager(text){
+  sendOrder(text).then(ok=>{
+    toast(ok ? 'Заказ отправлен менеджеру ✓ Чат открыт — можно написать там'
+             : 'Текст заказа скопирован — вставьте его в чат менеджеру');
+  });
   try{ navigator.clipboard.writeText(text); }catch(e){}
   window.open('https://t.me/'+MANAGER,'_blank');
-  toast('Текст заказа скопирован — вставьте его в чат менеджеру');
 }
 
 function checkout(){
