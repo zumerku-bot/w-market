@@ -917,12 +917,22 @@ function cnPhotoPicked(input){
   reader.onload=e=>{cnPhotoData=e.target.result;document.getElementById('cnPhotoPreview').innerHTML=`<img src="${cnPhotoData}">`;};
   reader.readAsDataURL(f);
 }
+// Видимая подпись выбранного пункта выпадающего списка
+function selLabel(id){ const s=document.getElementById(id); return (s&&s.selectedOptions&&s.selectedOptions[0])?s.selectedOptions[0].text:''; }
 function orderChina(name){
   const link=(document.getElementById('cnLink')?document.getElementById('cnLink').value.trim():'');
   const total=document.getElementById('cnTotal')?document.getElementById('cnTotal').textContent:'';
+  const weight=(document.getElementById('cnWeight')?document.getElementById('cnWeight').value.trim():'');
+  const cat=selLabel('cnCat'), ship=selLabel('cnShip');
+  const calcUsed = total && total!=='—';
   let msg='Здравствуйте! Хочу заказать '+(name?`товар «${name}»`:'товар из Китая')+' через W Market.\n';
   if(link) msg+='Ссылка на товар: '+link+'\n';
-  if(total && total!=='—') msg+='Примерный расчёт по калькулятору: '+total+'\n';
+  if(calcUsed){
+    if(cat) msg+='Категория: '+cat+'\n';
+    if(weight) msg+='Вес посылки: '+weight+' кг\n';
+    if(ship) msg+='Способ доставки: '+ship+'\n';
+    msg+='Примерный расчёт по калькулятору: '+total+'\n';
+  }
   if(cnPhotoData) msg+='(фото товара приложу отдельным сообщением)\n';
   contactManager(msg);
   if(cnPhotoData) setTimeout(()=>toast('Не забудь отправить фото товара в чат 📷'),2600);
@@ -956,9 +966,17 @@ function euPhotoPicked(input){
 function orderEurope(name){
   const link=(document.getElementById('euLink')?document.getElementById('euLink').value.trim():'');
   const total=document.getElementById('euTotal')?document.getElementById('euTotal').textContent:'';
+  const weight=(document.getElementById('euWeight')?document.getElementById('euWeight').value.trim():'');
+  const cat=selLabel('euCat'), ship=selLabel('euShip');
+  const calcUsed = total && total!=='—';
   let msg='Здравствуйте! Хочу заказать '+(name?`товар «${name}»`:'товар из Европы')+' через W Market.\n';
   if(link) msg+='Ссылка на товар: '+link+'\n';
-  if(total && total!=='—') msg+='Примерный расчёт по калькулятору: '+total+'\n';
+  if(calcUsed){
+    if(cat) msg+='Категория: '+cat+'\n';
+    if(weight) msg+='Вес посылки: '+weight+' кг\n';
+    if(ship) msg+='Способ доставки: '+ship+'\n';
+    msg+='Примерный расчёт по калькулятору: '+total+'\n';
+  }
   if(euPhotoData) msg+='(фото товара приложу отдельным сообщением)\n';
   contactManager(msg);
   if(euPhotoData) setTimeout(()=>toast('Не забудь отправить фото товара в чат 📷'),2600);
