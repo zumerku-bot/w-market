@@ -5,6 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>W MARKET — магазин одежды и доставка из Китая</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23000'/><polyline points='18,30 33,72 50,45 67,72 82,30' fill='none' stroke='%23fff' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+
+<meta name="description" content="W MARKET — брендовая одежда в наличии и выкуп из Китая и Европы под заказ. Оригинал, честные цены, доставка по Беларуси и России.">
+<meta name="theme-color" content="#000000">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://zumerku-bot.github.io/w-market/">
+
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="W MARKET">
+<meta name="mobile-web-app-capable" content="yes">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="W MARKET">
+<meta property="og:title" content="W MARKET — одежда в наличии и доставка из Китая">
+<meta property="og:description" content="Брендовая одежда в наличии и выкуп из Китая и Европы. Оригинал, честные цены, доставка по РБ и РФ.">
+<meta property="og:url" content="https://zumerku-bot.github.io/w-market/">
+<meta property="og:image" content="https://zumerku-bot.github.io/w-market/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ru_RU">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="W MARKET — одежда в наличии и доставка из Китая">
+<meta name="twitter:description" content="Оригинал, честные цены, доставка по РБ и РФ. Собери заказ — остальное на нас.">
+<meta name="twitter:image" content="https://zumerku-bot.github.io/w-market/og-image.png">
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Store","name":"W MARKET","description":"Брендовая одежда в наличии и выкуп из Китая и Европы под заказ.","url":"https://zumerku-bot.github.io/w-market/","image":"https://zumerku-bot.github.io/w-market/og-image.png","priceRange":"45–399 BYN","areaServed":["Беларусь","Россия"],"sameAs":["https://t.me/wstockrb","https://www.instagram.com/w.store.by"],"contactPoint":{"@type":"ContactPoint","contactType":"sales","url":"https://t.me/wstockmanager"}}
+</script>
 <style>
   :root{
     --bg:#000;
@@ -1237,6 +1267,10 @@ renderAdmin();
 paintStars();
 updateCartCount();
 initFirebase(); // подключаемся к базе Firebase — живые данные для всех
+</script>
+<script>
+// PWA: регистрируем service worker (офлайн + «установить приложение»)
+if('serviceWorker' in navigator){ addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
 </script>
 </body>
 </html>
