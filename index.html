@@ -428,6 +428,30 @@
   .sg th,.sg td{border:1px solid var(--line);padding:9px 8px;text-align:center}
   .sg th{background:var(--bg2);color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.5px}
   .sg td:first-child{color:var(--muted);text-align:left}
+
+  /* О нас / FAQ */
+  .ab-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:28px 0 12px}
+  .ab-stat{border:1px solid var(--line);border-radius:16px;padding:24px 18px;background:linear-gradient(180deg,var(--card),var(--bg2));text-align:center}
+  .ab-stat b{display:block;font-size:clamp(28px,4.5vw,44px);font-weight:900;line-height:1}
+  .ab-stat span{display:block;margin-top:8px;font-size:11px;letter-spacing:.5px;color:var(--muted);text-transform:uppercase}
+  .ab-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  .ab-card{border:1px solid var(--line);border-radius:16px;padding:24px 22px;background:var(--card)}
+  .ab-ic{width:40px;height:40px;border-radius:11px;background:#fff;color:#000;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;margin-bottom:14px}
+  .ab-card h4{font-size:16px;font-weight:700;margin-bottom:6px}
+  .ab-card p{font-size:13.5px;color:var(--muted)}
+  .faq{display:flex;flex-direction:column;gap:10px}
+  .faq details{border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}
+  .faq summary{list-style:none;cursor:pointer;padding:18px 20px;font-size:15px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{content:"+";font-size:22px;color:var(--muted);transition:.2s;font-weight:400;line-height:1}
+  .faq details[open] summary::after{transform:rotate(45deg)}
+  .faq details[open] summary{border-bottom:1px solid var(--line)}
+  .faq details p{padding:16px 20px;color:var(--muted);font-size:14px}
+  .ab-cta{text-align:center;border:1px solid var(--line);border-radius:20px;padding:48px 26px;margin-top:24px;
+    background:radial-gradient(600px 300px at 50% -30%,rgba(255,255,255,.06),transparent 60%),var(--card)}
+  .ab-cta h3{font-size:24px;font-weight:800;margin-bottom:8px}
+  .ab-cta p{color:var(--muted);margin-bottom:22px}
+  @media(max-width:620px){.ab-stats{grid-template-columns:repeat(2,1fr)}}
   .pm-actions .btn{flex:1}
 
   @media(max-width:560px){
@@ -458,6 +482,7 @@
     <button class="tab" data-tab="china" onclick="showTab('china')">Доставка из Китая</button>
     <button class="tab" data-tab="europe" onclick="showTab('europe')">Доставка из Европы</button>
     <button class="tab" data-tab="reviews" onclick="showTab('reviews')">Отзывы</button>
+    <button class="tab" data-tab="about" onclick="showTab('about')">О нас · FAQ</button>
   </nav>
 </header>
 
@@ -669,6 +694,56 @@
     </div>
 
     <div class="rev-list" id="revList"></div>
+  </section>
+
+  <!-- ============ О НАС / FAQ ============ -->
+  <section class="section" id="about">
+    <div class="hero">
+      <h1>W MARKET —<br>вещи, которым доверяют</h1>
+      <p>Собираем брендовую одежду в наличии и выкупаем что угодно из Китая и Европы. Оригинал, честная цена, аккуратная доставка по РБ и РФ.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="https://t.me/wstockmanager" target="_blank" rel="noopener">Написать менеджеру</a>
+        <a class="btn btn-ghost" href="https://t.me/wstockrb" target="_blank" rel="noopener">Наш канал →</a>
+      </div>
+    </div>
+
+    <div class="ab-stats">
+      <div class="ab-stat"><b>500+</b><span>заказов выполнено</span></div>
+      <div class="ab-stat"><b>4.9★</b><span>средний рейтинг</span></div>
+      <div class="ab-stat"><b>2–3</b><span>дня по наличию</span></div>
+      <div class="ab-stat"><b>100%</b><span>оригинал</span></div>
+    </div>
+
+    <div class="sec-head"><div><h2>Почему нам доверяют</h2><p>Коротко о главном</p></div></div>
+    <div class="ab-cards">
+      <div class="ab-card"><div class="ab-ic">✓</div><h4>Только оригинал</h4><p>Проверяем каждую вещь перед отправкой. Никаких подделок.</p></div>
+      <div class="ab-card"><div class="ab-ic">₽</div><h4>Честная цена</h4><p>Считаем стоимость заранее в калькуляторе — без скрытых наценок.</p></div>
+      <div class="ab-card"><div class="ab-ic">✈</div><h4>Доставка РБ и РФ</h4><p>Наличие — 2–3 дня. Под заказ из Китая — 12–20 дней, из Европы — свои сроки.</p></div>
+      <div class="ab-card"><div class="ab-ic">💬</div><h4>Всегда на связи</h4><p>Менеджер в Telegram отвечает быстро — поможет с выбором и размером.</p></div>
+    </div>
+
+    <div class="sec-head"><div><h2>Доставка и оплата</h2></div></div>
+    <div class="ab-cards">
+      <div class="ab-card"><h4>В наличии</h4><p>Отправляем в день заказа, доходит за 2–3 дня по РБ. По РФ — по договорённости.</p></div>
+      <div class="ab-card"><h4>Под заказ из Китая</h4><p>Выкуп с Poizon / Taobao / Pinduoduo. Авто 12–20 дней или авиа 7–12. Комиссия выкупа 10%.</p></div>
+      <div class="ab-card"><h4>Оплата</h4><p>Удобным способом — уточни у менеджера при оформлении. Для выкупа под заказ — предоплата товара.</p></div>
+    </div>
+
+    <div class="sec-head"><div><h2>Частые вопросы</h2></div></div>
+    <div class="faq">
+      <details><summary>Это оригинал?</summary><p>Да. Работаем с проверенными поставщиками и осматриваем вещи перед отправкой. Если что-то не так — решаем в твою пользу.</p></details>
+      <details><summary>Сколько идёт доставка?</summary><p>В наличии — 2–3 дня. Под заказ из Китая — 12–20 дней (авто) или 7–12 (авиа). Из Европы — зависит от товара, скажем точнее при заказе.</p></details>
+      <details><summary>Как узнать цену доставки из Китая?</summary><p>В разделе «Доставка из Китая» есть калькулятор: вводишь цену, вес и способ доставки — видишь примерную сумму. Точную назовёт менеджер.</p></details>
+      <details><summary>Что если не подошёл размер или брак?</summary><p>Напиши менеджеру — обменяем или вернём по договорённости. Перед заказом загляни в «📏 Размерную сетку» в каталоге.</p></details>
+      <details><summary>Как оформить заказ?</summary><p>Добавь товар в корзину (в наличии) или нажми «Заказать» (под заказ) — текст с деталями скопируется и откроется чат менеджера. Вставь и отправь.</p></details>
+      <details><summary>Доставляете в Россию?</summary><p>Да, по РФ доставляем — условия и сроки уточни у менеджера.</p></details>
+    </div>
+
+    <div class="ab-cta">
+      <h3>Остались вопросы?</h3>
+      <p>Напиши — ответим за пару минут.</p>
+      <a class="btn btn-primary" href="https://t.me/wstockmanager" target="_blank" rel="noopener">💬 Написать в Telegram</a>
+    </div>
   </section>
 
 </main>
