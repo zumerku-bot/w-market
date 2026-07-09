@@ -380,6 +380,54 @@
   }
   .pm-photo-preview img{width:100%;height:100%;object-fit:cover}
   .pm-actions{display:flex;gap:10px;margin-top:18px}
+
+  /* сортировка + размерная сетка */
+  .sortsel{background:#000;border:1px solid var(--line2);border-radius:30px;padding:9px 14px;color:#fff;font-size:13px;font-weight:600;outline:none;cursor:pointer}
+  .guide-chip{cursor:pointer}
+  .fav-chip.active{background:#ff4d6d;border-color:#ff4d6d;color:#fff}
+  /* сердечко избранного на карточке */
+  .card-img{cursor:pointer}
+  .fav-btn{position:absolute;top:11px;right:11px;z-index:3;width:34px;height:34px;border-radius:50%;
+    background:rgba(0,0,0,.5);backdrop-filter:blur(4px);border:1px solid var(--line2);color:#fff;font-size:16px;
+    display:flex;align-items:center;justify-content:center;transition:.18s;line-height:1}
+  .fav-btn:hover{background:#000;transform:scale(1.08)}
+  .fav-btn.on{color:#ff4d6d;border-color:#ff4d6d}
+  /* быстрый просмотр */
+  .qv{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.96);z-index:70;
+    width:min(860px,94vw);max-height:90vh;overflow:auto;background:var(--card);border:1px solid var(--line2);
+    border-radius:20px;opacity:0;pointer-events:none;transition:.25s}
+  .qv.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+  .qv-close{position:absolute;top:12px;right:14px;z-index:4;width:34px;height:34px;border-radius:50%;
+    background:rgba(0,0,0,.5);border:1px solid var(--line2);color:#fff;font-size:20px;line-height:1}
+  #qvBody{display:grid;grid-template-columns:1fr 1fr}
+  .qv-media{position:relative;aspect-ratio:1/1;background:linear-gradient(135deg,#1a1a1a,#000);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:20px 0 0 20px}
+  .qv-media img{width:100%;height:100%;object-fit:cover}
+  .qv-emoji{font-size:110px;filter:grayscale(1) contrast(1.1)}
+  .qv-info{padding:32px 30px;display:flex;flex-direction:column}
+  .qv-cat{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+  .qv-name{font-size:26px;font-weight:800;margin:8px 0 14px;line-height:1.1}
+  .qv-price{font-size:26px;font-weight:800;margin-bottom:18px}
+  .qv-price small{font-size:14px;color:var(--muted);font-weight:500}
+  .qv-sizes{display:flex;justify-content:space-between;gap:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0;margin-bottom:16px}
+  .qv-sizes span{color:var(--muted)}.qv-sizes b{font-weight:700}
+  .qv-guide{align-self:flex-start;border:1px solid var(--line2);border-radius:30px;padding:8px 15px;font-size:12.5px;font-weight:600;margin-bottom:16px;transition:.2s}
+  .qv-guide:hover{background:#fff;color:#000}
+  .qv-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto}
+  .fav-in.on{color:#ff4d6d;border-color:#ff4d6d}
+  @media(max-width:640px){#qvBody{grid-template-columns:1fr}.qv-media{border-radius:20px 20px 0 0;aspect-ratio:4/3}}
+  /* таблица размеров */
+  .sg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.96);z-index:75;
+    width:min(560px,94vw);max-height:88vh;overflow:auto;background:var(--card);border:1px solid var(--line2);
+    border-radius:18px;padding:26px;opacity:0;pointer-events:none;transition:.25s}
+  .sg.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+  .sg h3{font-size:20px;font-weight:800;margin-bottom:6px}
+  .sg>p{color:var(--muted);font-size:13px;margin-bottom:16px}
+  .sg h4{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+  .sg table{width:100%;border-collapse:collapse;font-size:13px}
+  .sg th,.sg td{border:1px solid var(--line);padding:9px 8px;text-align:center}
+  .sg th{background:var(--bg2);color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.5px}
+  .sg td:first-child{color:var(--muted);text-align:left}
   .pm-actions .btn{flex:1}
 
   @media(max-width:560px){
@@ -438,6 +486,13 @@
       <div class="search">
         🔍 <input type="text" id="searchInput" placeholder="Поиск по товарам..." oninput="renderCatalog()">
       </div>
+      <select id="catSort" class="sortsel" onchange="catSort=this.value;renderCatalog()">
+        <option value="default">Сортировка</option>
+        <option value="cheap">Сначала дешевле</option>
+        <option value="exp">Сначала дороже</option>
+        <option value="new">Сначала новые</option>
+      </select>
+      <button class="chip guide-chip" onclick="openSizeGuide()">📏 Размерная сетка</button>
     </div>
     <div class="filters" id="catFilters"></div>
 
@@ -684,6 +739,29 @@
 
 <div class="lightbox" id="lightbox" onclick="this.classList.remove('open')"><img id="lightboxImg" src=""></div>
 
+<!-- Быстрый просмотр товара -->
+<div class="overlay" id="qvOverlay" style="z-index:69" onclick="closeQuickView()"></div>
+<div class="qv" id="qvModal"><button class="qv-close" onclick="closeQuickView()">×</button><div id="qvBody"></div></div>
+
+<!-- Таблица размеров -->
+<div class="overlay" id="sgOverlay" style="z-index:74" onclick="closeSizeGuide()"></div>
+<div class="sg" id="sgModal">
+  <h3>Таблица размеров</h3>
+  <p>Ориентир. Если ты между размерами — бери больший или уточни у менеджера.</p>
+  <h4>Одежда</h4>
+  <table>
+    <tr><th>Размер</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>XXL</th></tr>
+    <tr><td>Рост, см</td><td>165–172</td><td>170–178</td><td>176–184</td><td>182–190</td><td>188–196</td></tr>
+    <tr><td>Грудь, см</td><td>88–94</td><td>94–100</td><td>100–108</td><td>108–116</td><td>116–124</td></tr>
+  </table>
+  <h4>Обувь</h4>
+  <table>
+    <tr><th>EU</th><th>39</th><th>40</th><th>41</th><th>42</th><th>43</th><th>44</th><th>45</th></tr>
+    <tr><td>Стопа, см</td><td>24.5</td><td>25</td><td>25.5</td><td>26.5</td><td>27</td><td>28</td><td>28.5</td></tr>
+  </table>
+  <div class="pm-actions"><button class="btn btn-ghost" onclick="closeSizeGuide()">Закрыть</button></div>
+</div>
+
 <!-- Подтверждение заказа: понятно показываем, что текст скопирован, и ведём в чат менеджера -->
 <div class="overlay" id="orderOverlay" onclick="closeOrderModal()"></div>
 <div class="pmodal" id="orderModal">
@@ -759,6 +837,8 @@ let reviews = [];
 let cart = JSON.parse(localStorage.getItem('wm_cart')||'{}');
 let pickedStars = 5;
 let activeFilter = 'Все';
+let favs = JSON.parse(localStorage.getItem('wm_favs')||'[]');
+let catSort = 'default';
 let ADMIN = false; // вошёл ли администратор (Firebase Auth)
 
 /* ============ ЗАГРУЗКА ИЗ FIREBASE ============ */
@@ -787,16 +867,21 @@ function showTab(tab){
 /* ============ CATALOG ============ */
 function renderFilters(){
   const cats = ['Все',...new Set(CATALOG.map(p=>p.cat))];
-  document.getElementById('catFilters').innerHTML = cats.map(c=>
+  const favChip = favs.length ? `<button class="chip fav-chip ${activeFilter==='__fav'?'active':''}" onclick="setFilter('__fav')">♥ Избранное (${favs.length})</button>` : '';
+  document.getElementById('catFilters').innerHTML = favChip + cats.map(c=>
     `<button class="chip ${c===activeFilter?'active':''}" onclick="setFilter('${c}')">${c}</button>`).join('');
 }
 function setFilter(c){activeFilter=c;renderFilters();renderCatalog();}
 
+function priceNum(v){const n=parseFloat(String(v).replace(/[^\d.,]/g,'').replace(',','.'));return isNaN(n)?Infinity:n;}
 function renderCatalog(){
   const q = (document.getElementById('searchInput').value||'').toLowerCase();
-  const items = CATALOG.filter(p=>
-    (activeFilter==='Все'||p.cat===activeFilter) &&
+  let items = CATALOG.filter(p=>
+    (activeFilter==='__fav' ? favs.includes(p.id) : (activeFilter==='Все'||p.cat===activeFilter)) &&
     (p.name.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q)));
+  if(catSort==='cheap') items = items.slice().sort((a,b)=>priceNum(a.price)-priceNum(b.price));
+  else if(catSort==='exp') items = items.slice().sort((a,b)=>priceNum(b.price)-priceNum(a.price));
+  else if(catSort==='new') items = items.slice().sort((a,b)=>(b.id||0)-(a.id||0));
   document.getElementById('catGrid').innerHTML = items.length ? items.map(p=>productCard(p,'catalog')).join('')
     : `<p style="color:var(--muted);padding:30px 0">Ничего не найдено 🤷</p>`;
 }
@@ -814,13 +899,14 @@ function productCard(p, section){
     ? `<button class="add-btn ${inCart?'added':''}" onclick="addToCart(${p.id})">${inCart?'✓ В корзине':'+ В корзину'}</button>`
     : `<button class="add-btn" onclick="orderRequestById('${section}',${p.id})">Заказать</button>`;
   return `<div class="card">
-    <div class="card-img">
+    <div class="card-img" onclick="openQuickView('${section}',${p.id})">
       ${p.badge?`<span class="badge ${p.badge==='NEW'?'dark':''}">${escapeHtml(p.badge)}</span>`:''}
+      <button class="fav-btn ${isFav(p.id)?'on':''}" title="В избранное" onclick="event.stopPropagation();toggleFav(${p.id})">${isFav(p.id)?'♥':'♡'}</button>
       ${safePhoto(p.photo)?`<img src="${safePhoto(p.photo)}" alt="${escapeHtml(p.name)}">`:`<span class="emoji">${escapeHtml(p.emoji)}</span>`}
     </div>
     <div class="card-body">
       <div class="card-cat">${escapeHtml(p.cat)}</div>
-      <div class="card-name">${escapeHtml(p.name)}</div>
+      <div class="card-name" onclick="openQuickView('${section}',${p.id})" style="cursor:pointer">${escapeHtml(p.name)}</div>
       <div class="card-sizes">Размеры: ${escapeHtml(p.sizes)}</div>
       ${safeLink(p.link)?`<a class="card-link" href="${safeLink(p.link)}" target="_blank" rel="noopener noreferrer">🔗 Ссылка на товар</a>`:''}
       <div class="card-foot">
@@ -1013,6 +1099,61 @@ function orderEurope(name){
 function orderRequestById(section, id){
   if(section==='europe'){ const p=EUROPE.find(x=>x.id===id); orderEurope(p?p.name:''); }
   else { const p=CHINA.find(x=>x.id===id); orderChina(p?p.name:''); }
+}
+
+/* ============ ИЗБРАННОЕ ============ */
+function isFav(id){return favs.indexOf(id)>=0;}
+function toggleFav(id){
+  const i=favs.indexOf(id);
+  if(i>=0) favs.splice(i,1); else favs.push(id);
+  localStorage.setItem('wm_favs',JSON.stringify(favs));
+  if(activeFilter==='__fav' && !favs.length) activeFilter='Все';
+  toast(i>=0?'Убрано из избранного':'Добавлено в избранное ♥');
+  renderFilters(); renderCatalog();
+}
+
+/* ============ БЫСТРЫЙ ПРОСМОТР ТОВАРА ============ */
+function findAny(section,id){
+  const arr = section==='china'?CHINA : section==='europe'?EUROPE : CATALOG;
+  return arr.find(x=>x.id===id);
+}
+function openQuickView(section,id){
+  const p=findAny(section,id); if(!p) return;
+  const media = safePhoto(p.photo)
+    ? `<img src="${safePhoto(p.photo)}" alt="${escapeHtml(p.name)}">`
+    : `<span class="qv-emoji">${escapeHtml(p.emoji||'👕')}</span>`;
+  const fav = isFav(p.id);
+  const action = section==='catalog'
+    ? `<button class="btn btn-primary" onclick="addToCart(${p.id});closeQuickView()">+ В корзину</button>`
+    : `<button class="btn btn-primary" onclick="closeQuickView();orderRequestById('${section}',${p.id})">Заказать</button>`;
+  document.getElementById('qvBody').innerHTML = `
+    <div class="qv-media">${p.badge?`<span class="badge ${p.badge==='NEW'?'dark':''}">${escapeHtml(p.badge)}</span>`:''}${media}</div>
+    <div class="qv-info">
+      <div class="qv-cat">${escapeHtml(p.cat)}</div>
+      <h3 class="qv-name">${escapeHtml(p.name)}</h3>
+      <div class="qv-price">${escapeHtml(String(p.price))} <small>BYN</small></div>
+      <div class="qv-sizes"><span>Размеры</span><b>${escapeHtml(p.sizes||'—')}</b></div>
+      <button class="qv-guide" onclick="openSizeGuide()">📏 Таблица размеров</button>
+      ${safeLink(p.link)?`<a class="card-link" href="${safeLink(p.link)}" target="_blank" rel="noopener noreferrer">🔗 Ссылка на товар</a>`:''}
+      <div class="qv-actions">
+        ${action}
+        <button class="btn btn-ghost fav-in ${fav?'on':''}" onclick="toggleFav(${p.id});openQuickView('${section}',${p.id})">${fav?'♥ В избранном':'♡ В избранное'}</button>
+      </div>
+    </div>`;
+  document.getElementById('qvOverlay').classList.add('open');
+  document.getElementById('qvModal').classList.add('open');
+}
+function closeQuickView(){
+  document.getElementById('qvOverlay').classList.remove('open');
+  document.getElementById('qvModal').classList.remove('open');
+}
+function openSizeGuide(){
+  document.getElementById('sgOverlay').classList.add('open');
+  document.getElementById('sgModal').classList.add('open');
+}
+function closeSizeGuide(){
+  document.getElementById('sgOverlay').classList.remove('open');
+  document.getElementById('sgModal').classList.remove('open');
 }
 
 /* ============ REVIEWS ============ */
