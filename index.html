@@ -931,7 +931,9 @@ let catSort = 'default';
 let ADMIN = false; // вошёл ли администратор (Firebase Auth)
 
 /* ============ ЗАГРУЗКА ИЗ FIREBASE ============ */
-function objToArr(o){ return o ? Object.values(o).sort((a,b)=>(b.id||0)-(a.id||0)) : []; }
+// _key — реальный ключ записи в базе (может не совпадать с полем id, если запись вставили вручную)
+function objToArr(o){ return o ? Object.entries(o).filter(([k,v])=>v && typeof v==='object').map(([k,v])=>Object.assign({},v,{_key:k})).sort((a,b)=>(b.id||0)-(a.id||0)) : []; }
+function jsq(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); } // безопасно вставить ключ в onclick
 
 function initFirebase(){
   // живые данные: каталог, доставка, отзывы обновляются у всех автоматически
@@ -1013,8 +1015,8 @@ function productCard(p, section){
         ${orderBtn}
       </div>
       ${isAdmin()?`<div class="card-admin">
-        <button onclick="openProductModal('${section}',${p.id})">✎ Изменить</button>
-        <button onclick="deleteProduct(${p.id})">🗑 Удалить</button>
+        <button onclick="openProductModal('${section}','${jsq(p._key||p.id)}')">✎ Изменить</button>
+        <button onclick="deleteProduct('${jsq(p._key||p.id)}')">🗑 Удалить</button>
       </div>`:''}
     </div>
   </div>`;
@@ -1271,7 +1273,7 @@ function renderReviews(){
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <div class="stars">${starStr(r.rating)}</div>
-          ${isAdmin()&&r.id?`<button class="rev-del" onclick="deleteReview(${r.id})" title="Удалить отзыв">🗑</button>`:''}
+          ${isAdmin()&&r._key?`<button class="rev-del" onclick="deleteReview('${jsq(r._key)}')" title="Удалить отзыв">🗑</button>`:''}
         </div>
       </div>
       <p>${escapeHtml(r.text)}</p>
@@ -1336,25 +1338,26 @@ function renderPending(){
       <p>${escapeHtml(r.text)}</p>
       ${(r.photos&&r.photos.length)?`<div class="review-photos">${r.photos.map(safePhoto).filter(Boolean).map(src=>`<img src="${src}" onclick="openLightbox(this.src)" alt="фото">`).join('')}</div>`:''}
       <div class="mod-actions">
-        <button class="mod-ok" onclick="approveReview(${r.id})">✓ Одобрить</button>
-        <button class="mod-no" onclick="rejectReview(${r.id})">✗ Отклонить</button>
+        <button class="mod-ok" onclick="approveReview('${jsq(r._key)}')">✓ Одобрить</button>
+        <button class="mod-no" onclick="rejectReview('${jsq(r._key)}')">✗ Отклонить</button>
       </div>
     </div>`).join('') : `<p style="color:var(--muted2);font-size:13px">Новых отзывов на проверку нет.</p>`;
 }
-async function approveReview(id){
+async function approveReview(key){
   if(!isAdmin()) return;
-  const r=(pending||[]).find(x=>x.id===id); if(!r){toast('Отзыв не найден');return;}
+  const r=(pending||[]).find(x=>x._key===key); if(!r){toast('Отзыв не найден');return;}
+  const rev=Object.assign({},r); delete rev._key;      // _key в базу не пишем
   try{
-    await FDB.ref('reviews/'+id).set(r);
-    await FDB.ref('pending/'+id).remove();
+    await FDB.ref('reviews/'+key).set(rev);
+    await FDB.ref('pending/'+key).remove();
     toast('Отзыв опубликован');
-  }catch(e){toast('Не удалось одобрить');}
+  }catch(e){toast('Не удалось одобрить: '+(e&&e.code||''));}
 }
-async function rejectReview(id){
+async function rejectReview(key){
   if(!isAdmin()) return;
   if(!confirm('Отклонить (удалить) этот отзыв?')) return;
-  try{ await FDB.ref('pending/'+id).remove(); toast('Отзыв отклонён'); }
-  catch(e){toast('Не удалось отклонить');}
+  try{ await FDB.ref('pending/'+key).remove(); toast('Отзыв отклонён'); }
+  catch(e){toast('Не удалось отклонить: '+(e&&e.code||''));}
 }
 
 async function addReview(){
@@ -1439,9 +1442,9 @@ function adminLogout(){
 let pmSection='catalog', pmId=null, pmPhotoData=null;
 
 function sectionArr(section){ return section==='china'?CHINA : section==='europe'?EUROPE : CATALOG; }
-function openProductModal(section,id){
-  pmSection=section; pmId=id||null; pmPhotoData=null;
-  const p=id?sectionArr(section).find(x=>x.id===id):null;
+function openProductModal(section,key){
+  pmSection=section; pmId=key||null; pmPhotoData=null;
+  const p=key?sectionArr(section).find(x=>String(x._key||x.id)===String(key)):null;
   const suffix = section==='china'?' (под заказ из Китая)' : section==='europe'?' (под заказ из Европы)' : ' (в наличии)';
   document.getElementById('pmTitle').textContent = p?'Изменить товар':'Новый товар'+suffix;
   document.getElementById('pmName').value=p?p.name:'';
@@ -1493,7 +1496,9 @@ async function saveProduct(){
   if(!isAdmin()){toast('Только для администратора');return;}
   const priceRaw=document.getElementById('pmPrice').value.trim();
   const priceNum=parseFloat(priceRaw.replace(',','.'));
-  const id = pmId || Date.now();
+  const key = pmId || String(Date.now());              // ключ записи в базе
+  const prev = pmId ? sectionArr(pmSection).find(x=>String(x._key||x.id)===String(pmId)) : null;
+  const id = (prev && prev.id!=null) ? prev.id : (isNaN(Number(key)) ? Date.now() : Number(key));
   const product={
     id:id,
     name:document.getElementById('pmName').value.trim(),
@@ -1506,33 +1511,32 @@ async function saveProduct(){
   if(!product.name){toast('Укажи название товара');return;}
   const link=document.getElementById('pmLink').value.trim();
   if(link){ if(!safeLink(link)){toast('Ссылка должна начинаться с http:// или https://');return;} product.link=link; }
-  const existing=sectionArr(pmSection).find(x=>x.id===id);
   if(pmPhotoData) product.photo=pmPhotoData;
-  else if(existing && existing.photo) product.photo=existing.photo;
+  else if(prev && prev.photo) product.photo=prev.photo;
   try{
-    await FDB.ref(pmSection+'/'+id).set(product);
+    await FDB.ref(pmSection+'/'+key).set(product);
     closeProductModal();
     toast(pmId?'Товар обновлён':'Товар добавлен');
   }catch(e){toast('Не удалось сохранить товар');}
 }
-async function deleteProduct(id){
+async function deleteProduct(key){
   if(!isAdmin()){toast('Только для администратора');return;}
   if(!confirm('Удалить этот товар?')) return;
   try{
-    await FDB.ref('catalog/'+id).remove();
-    await FDB.ref('china/'+id).remove();
-    await FDB.ref('europe/'+id).remove();
-    delete cart[id]; saveCart();
+    await FDB.ref('catalog/'+key).remove();
+    await FDB.ref('china/'+key).remove();
+    await FDB.ref('europe/'+key).remove();
+    delete cart[key]; saveCart();
     toast('Товар удалён');
-  }catch(e){toast('Не удалось удалить');}
+  }catch(e){toast('Не удалось удалить: '+(e&&e.code||''));}
 }
-async function deleteReview(id){
+async function deleteReview(key){
   if(!isAdmin()){toast('Только для администратора');return;}
   if(!confirm('Удалить этот отзыв?')) return;
   try{
-    await FDB.ref('reviews/'+id).remove();
+    await FDB.ref('reviews/'+key).remove();
     toast('Отзыв удалён');
-  }catch(e){toast('Не удалось удалить');}
+  }catch(e){toast('Не удалось удалить: '+(e&&e.code||''));}
 }
 
 /* ============ INIT ============ */
