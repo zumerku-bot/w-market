@@ -345,6 +345,13 @@
   .card-admin button:hover{background:#fff;color:#000;border-color:#fff}
   .rev-del{color:var(--muted2);font-size:16px;padding:4px 8px;border-radius:6px}
   .rev-del:hover{background:#1a1a1a;color:#fff}
+  .mod-actions{display:flex;gap:8px;margin-top:12px}
+  .mod-actions button{border-radius:9px;padding:8px 14px;font-size:13px;font-weight:700;border:1px solid var(--line2)}
+  .mod-ok{background:#fff;color:#000;border-color:#fff}
+  .mod-ok:hover{opacity:.85}
+  .mod-no{color:var(--muted)}
+  .mod-no:hover{background:#1a1a1a;color:#fff}
+  .review.pending{border-color:#4a4a2a;background:#14140c}
   .rev-photo-previews{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .rev-photo-previews .thumb{
     width:64px;height:64px;border-radius:10px;overflow:hidden;position:relative;border:1px solid var(--line2);
@@ -666,6 +673,12 @@
   <section class="section" id="reviews">
     <div class="sec-head"><div><h2>Отзывы</h2><p>Что говорят покупатели W Market</p></div></div>
 
+    <!-- Модерация (видна только администратору) -->
+    <div class="admin-only" id="modBlock" style="flex-direction:column;align-items:stretch;width:100%;margin-bottom:22px">
+      <div class="sec-head" style="margin:0 0 14px"><div><h3 style="font-size:18px">На модерации <span id="modCount" style="color:var(--muted)">(0)</span></h3><p>Новые отзывы гостей — одобри или отклони</p></div></div>
+      <div class="rev-list" id="pendingList"></div>
+    </div>
+
     <div class="rev-summary">
       <div class="rev-score">
         <div class="big" id="avgScore">5.0</div>
@@ -690,7 +703,8 @@
         <input type="file" id="revPhotos" accept="image/*" multiple onchange="revPhotosPicked(this)">
         <div class="rev-photo-previews" id="revPhotoPreviews"></div>
       </div>
-      <button class="btn btn-primary" onclick="addReview()">Опубликовать отзыв</button>
+      <button class="btn btn-primary" onclick="addReview()">Отправить отзыв</button>
+      <p style="color:var(--muted2);font-size:12px;margin-top:10px">Отзыв появится на сайте после проверки модератором.</p>
     </div>
 
     <div class="rev-list" id="revList"></div>
@@ -908,6 +922,7 @@ let CATALOG = [];
 let CHINA = [];
 let EUROPE = [];
 let reviews = [];
+let pending = []; // отзывы на модерации (видит только админ)
 let cart = JSON.parse(localStorage.getItem('wm_cart')||'{}');
 let pickedStars = 5;
 let activeFilter = 'Все';
@@ -925,10 +940,20 @@ function initFirebase(){
   FDB.ref('europe').on('value',  s=>{ EUROPE=objToArr(s.val());  renderEurope(); });
   FDB.ref('reviews').on('value', s=>{ reviews=objToArr(s.val()); renderReviews(); });
   // отслеживаем вход администратора
-  FAUTH.onAuthStateChanged(u=>{ ADMIN=!!u; rerenderAll(); });
+  FAUTH.onAuthStateChanged(u=>{
+    // админ = реальный вход по email; анонимные гости (заказы) админом НЕ считаются
+    ADMIN = !!(u && !u.isAnonymous);
+    if(ADMIN){
+      // админ видит отзывы на модерации
+      FDB.ref('pending').on('value', s=>{ pending=objToArr(s.val()); renderPending(); });
+    } else {
+      FDB.ref('pending').off(); pending=[]; renderPending();
+    }
+    rerenderAll();
+  });
 }
 function rerenderAll(){
-  renderFilters(); renderCatalog(); renderChina(); renderEurope(); renderReviews(); renderAdmin();
+  renderFilters(); renderCatalog(); renderChina(); renderEurope(); renderReviews(); renderPending(); renderAdmin();
 }
 
 /* ============ TABS ============ */
@@ -1293,6 +1318,45 @@ function openLightbox(src){
   document.getElementById('lightbox').classList.add('open');
 }
 
+/* ============ МОДЕРАЦИЯ (только админ) ============ */
+function renderPending(){
+  const box=document.getElementById('pendingList'); if(!box) return;
+  const list=(pending||[]).filter(r=>r && Number(r.rating)>=1 && Number(r.rating)<=5);
+  document.getElementById('modCount').textContent='('+list.length+')';
+  document.getElementById('modBlock').style.opacity = list.length? '1':'.55';
+  box.innerHTML = list.length ? list.map(r=>`
+    <div class="review pending">
+      <div class="review-top">
+        <div class="review-who">
+          <div class="avatar">${(r.name||'?')[0].toUpperCase()}</div>
+          <div><b>${escapeHtml(r.name)}</b><small>${r.city?escapeHtml(r.city)+' · ':''}${fmtDate(r.date)}</small></div>
+        </div>
+        <div class="stars">${starStr(r.rating)}</div>
+      </div>
+      <p>${escapeHtml(r.text)}</p>
+      ${(r.photos&&r.photos.length)?`<div class="review-photos">${r.photos.map(safePhoto).filter(Boolean).map(src=>`<img src="${src}" onclick="openLightbox(this.src)" alt="фото">`).join('')}</div>`:''}
+      <div class="mod-actions">
+        <button class="mod-ok" onclick="approveReview(${r.id})">✓ Одобрить</button>
+        <button class="mod-no" onclick="rejectReview(${r.id})">✗ Отклонить</button>
+      </div>
+    </div>`).join('') : `<p style="color:var(--muted2);font-size:13px">Новых отзывов на проверку нет.</p>`;
+}
+async function approveReview(id){
+  if(!isAdmin()) return;
+  const r=(pending||[]).find(x=>x.id===id); if(!r){toast('Отзыв не найден');return;}
+  try{
+    await FDB.ref('reviews/'+id).set(r);
+    await FDB.ref('pending/'+id).remove();
+    toast('Отзыв опубликован');
+  }catch(e){toast('Не удалось одобрить');}
+}
+async function rejectReview(id){
+  if(!isAdmin()) return;
+  if(!confirm('Отклонить (удалить) этот отзыв?')) return;
+  try{ await FDB.ref('pending/'+id).remove(); toast('Отзыв отклонён'); }
+  catch(e){toast('Не удалось отклонить');}
+}
+
 async function addReview(){
   const name=document.getElementById('revName').value.trim();
   const city=document.getElementById('revCity').value.trim();
@@ -1304,9 +1368,8 @@ async function addReview(){
   const rev={id:id,name:name,city:city,rating:pickedStars,text:text,date:new Date().toISOString().slice(0,10)};
   if(revPhotoData.length) rev.photos=revPhotoData.slice(0,4);
   try{
-    // молча берём гостевой пропуск Firebase — чтобы правила БД отличали сайт от бота
-    if(FAUTH && !FAUTH.currentUser){ try{ await FAUTH.signInAnonymously(); }catch(e){} }
-    await FDB.ref('reviews/'+id).set(rev);
+    // отзыв уходит на модерацию — появится на сайте после одобрения
+    await FDB.ref('pending/'+id).set(rev);
   }catch(e){toast('Не удалось отправить отзыв, попробуй ещё раз');return;}
   document.getElementById('revName').value='';
   document.getElementById('revCity').value='';
@@ -1314,7 +1377,7 @@ async function addReview(){
   document.getElementById('revPhotos').value='';
   revPhotoData=[];
   renderRevPhotoPreviews();
-  toast('Спасибо за отзыв!');
+  toast('Спасибо! Отзыв появится после проверки модератором.');
 }
 
 /* star picker */
@@ -1478,6 +1541,7 @@ renderCatalog();
 renderChina();
 renderEurope();
 renderReviews();
+renderPending();
 renderAdmin();
 paintStars();
 updateCartCount();
